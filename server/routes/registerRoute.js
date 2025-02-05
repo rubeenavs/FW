@@ -1,52 +1,59 @@
-const express = require('express');
-const pool = require('../db');
-const bcrypt = require('bcrypt');
-const Joi = require('joi');
-
+const express = require("express");
+const bcrypt = require("bcrypt");
+const { supabase } = require("../db"); 
 const router = express.Router();
 
-// Validation schema for registration
-const registerSchema = Joi.object({
-  username: Joi.string().min(3).max(255).required(),
-  password: Joi.string().min(6).max(255).required(),
-  email: Joi.string().email().required(),
-});
+router.post("/register", async (req, res) => {  
+    try {
+        console.log("🔹 Register API called");
+        console.log("Request Body:", req.body);
 
-// Register a new user
-router.post('/', async (req, res) => {
-  const { error, value } = registerSchema.validate(req.body);
+        const { username, email, password } = req.body;
 
-  if (error) {
-    return res.status(400).json({ error: error.details[0].message });
-  }
+        if (!username || !email || !password) {
+            console.log("❌ Missing Fields");
+            return res.status(400).json({ error: "All fields are required" });
+        }
 
-  const { username, password, email } = value;
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            console.log("❌ Invalid Email Format");
+            return res.status(400).json({ error: "Invalid email format" });
+        }
 
-  try {
-    // Check if the email or username already exists
-    const userExists = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR username = $2',
-      [email, username]
-    );
+        console.log("🔹 Checking if user exists in Supabase...");
+        const { data: existingUser, error: findError } = await supabase
+            .from("users")
+            .select("email")
+            .eq("email", email)
+            .single();
 
-    if (userExists.rows.length > 0) {
-      return res.status(400).json({ error: 'Email or username already exists' });
+        if (existingUser) {
+            console.log("❌ User already exists");
+            return res.status(400).json({ error: "User already exists" });
+        }
+
+        console.log("🔹 Hashing password...");
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        console.log("🔹 Inserting new user into Supabase...");
+        const { data, error } = await supabase
+            .from("users")
+            .insert([{ username, email, password: hashedPassword }]);
+
+        if (error) {
+            console.error("❌ Supabase Insert Error:", error);
+            return res.status(500).json({ error: "Database error" });
+        }
+
+        console.log("✅ User registered successfully:", data);
+        res.status(201).json({ message: "User registered successfully" });
+
+    } catch (error) {
+        console.error("❌ Registration Error:", error);
+        res.status(500).json({ error: "Server error" });
     }
-
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insert new user into the database
-    const result = await pool.query(
-      'INSERT INTO users (username, password, email, createdat) VALUES ($1, $2, $3, NOW()) RETURNING *',
-      [username, hashedPassword, email]
-    );
-
-    res.status(201).json({ message: 'User registered successfully', user: result.rows[0] });
-  } catch (err) {
-    console.error('Error during registration:', err.message);
-    res.status(500).json({ error: 'Server error' });
-  }
 });
 
 module.exports = router;
