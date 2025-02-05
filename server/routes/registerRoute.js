@@ -1,28 +1,37 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const { supabase } = require("../db"); 
+const { supabase } = require("../db");
 const router = express.Router();
 
-router.post("/register", async (req, res) => {  
+// ✅ User Registration Route
+router.post("/", async (req, res) => {
     try {
-        console.log("🔹 Register API called");
-        console.log("Request Body:", req.body);
+        console.log("\n🔹 Register API called");
+        console.log("📝 Request Body:", req.body);
 
-        const { username, email, password } = req.body;
+        const { username, email, password, role } = req.body;
 
-        if (!username || !email || !password) {
+        // ✅ Validate Required Fields
+        if (!username || !email || !password || !role) {
             console.log("❌ Missing Fields");
-            return res.status(400).json({ error: "All fields are required" });
+            return res.status(400).json({ error: "All fields (username, email, password, role) are required" });
         }
 
-        // Validate email format
+        // ✅ Validate Role (Only 'user' or 'admin' allowed)
+        if (!["user", "admin"].includes(role)) {
+            console.log("❌ Invalid Role:", role);
+            return res.status(400).json({ error: "Invalid role. Allowed values: 'user' or 'admin'" });
+        }
+
+        // ✅ Validate Email Format
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             console.log("❌ Invalid Email Format");
             return res.status(400).json({ error: "Invalid email format" });
         }
 
-        console.log("🔹 Checking if user exists in Supabase...");
+        // ✅ Check if User Already Exists
+        console.log("🔍 Checking if user exists in Supabase...");
         const { data: existingUser, error: findError } = await supabase
             .from("users")
             .select("email")
@@ -30,30 +39,37 @@ router.post("/register", async (req, res) => {
             .single();
 
         if (existingUser) {
-            console.log("❌ User already exists");
+            console.log("❌ User already exists:", existingUser);
             return res.status(400).json({ error: "User already exists" });
         }
 
+        // ✅ Hash Password
         console.log("🔹 Hashing password...");
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        console.log("🔹 Inserting new user into Supabase...");
-        const { data, error } = await supabase
+        // ✅ Insert New User into Supabase
+        console.log("🛠 Inserting new user into Supabase...");
+        const { data, error: insertError } = await supabase
             .from("users")
-            .insert([{ username, email, password: hashedPassword }]);
+            .insert([{ username, email, password: hashedPassword, role }]); // ✅ Role added
 
-        if (error) {
-            console.error("❌ Supabase Insert Error:", error);
-            return res.status(500).json({ error: "Database error" });
+        if (insertError) {
+            console.error("❌ Supabase Insert Error:", insertError);
+            return res.status(500).json({ error: "Database error", details: insertError });
         }
 
         console.log("✅ User registered successfully:", data);
-        res.status(201).json({ message: "User registered successfully" });
+        res.status(201).json({ message: "User registered successfully", user: data });
 
     } catch (error) {
         console.error("❌ Registration Error:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Server error", details: error.message });
     }
+});
+
+// ✅ Debug Route - Check API Health
+router.get("/", (req, res) => {
+    res.json({ message: "Register route is working!" });
 });
 
 module.exports = router;

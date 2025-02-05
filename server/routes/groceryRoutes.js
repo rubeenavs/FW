@@ -1,6 +1,6 @@
-const express = require('express');
-const pool = require('../db');
-const Joi = require('joi');
+const express = require("express");
+const { supabase } = require("../db"); // Import Supabase client
+const Joi = require("joi");
 
 const router = express.Router();
 
@@ -15,129 +15,120 @@ const grocerySchema = Joi.object({
 const validateUserId = (req, res, next) => {
   const { userid } = req.params;
   if (!userid || isNaN(userid)) {
-    return res.status(400).json({ error: 'Invalid user ID' });
+    return res.status(400).json({ error: "Invalid user ID" });
   }
   next();
 };
 
-// Middleware to validate grocery ID
-const validateGroceryId = (req, res, next) => {
-  const { groceryid } = req.params;
-  if (!groceryid || isNaN(groceryid)) {
-    return res.status(400).json({ error: 'Invalid grocery ID' });
-  }
-  next();
-};
-
-// Get groceries for a user
-router.get('/:userid', validateUserId, async (req, res) => {
+// ✅ GET all groceries for a user
+router.get("/:userid", validateUserId, async (req, res) => {
   const { userid } = req.params;
-
-  console.log('User ID in GET request:', userid);
+  console.log("🔹 User ID in GET request:", userid);
 
   try {
-    const result = await pool.query('SELECT * FROM groceries WHERE userid = $1', [userid]);
-    res.status(200).json(result.rows);
+    const { data, error } = await supabase
+      .from("groceries")
+      .select("*")
+      .eq("userid", userid);
+
+    if (error) {
+      console.error("❌ Database error fetching groceries:", error.message);
+      return res.status(500).json({ error: "Database error" });
+    }
+
+    res.status(200).json(data);
   } catch (error) {
-    console.error('Database error fetching groceries:', error.message);
-    res.status(500).json({ error: 'Error fetching groceries' });
+    console.error("❌ Error fetching groceries:", error.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Add or update a grocery
-router.post('/:userid', validateUserId, async (req, res) => {
+// ✅ POST (Add a grocery)
+router.post("/:userid", validateUserId, async (req, res) => {
   const { userid } = req.params;
   const { error, value } = grocerySchema.validate(req.body);
 
-  console.log('User ID in POST request:', userid);
+  console.log("🔹 User ID in POST request:", userid);
 
   if (error) {
-    console.error('Validation error:', error.details[0].message);
+    console.error("❌ Validation error:", error.details[0].message);
     return res.status(400).json({ error: error.details[0].message });
   }
 
   try {
-    // Check if grocery already exists for the user
-    const existingGrocery = await pool.query(
-      'SELECT * FROM groceries WHERE userid = $1 AND name = $2 AND unit = $3',
-      [userid, value.name, value.unit]
-    );
+    const { data, error: insertError } = await supabase
+      .from("groceries")
+      .insert([{ name: value.name, quantity: value.quantity, unit: value.unit, userid }]);
 
-    if (existingGrocery.rows.length > 0) {
-      // Update quantity if the grocery exists
-      const updatedGrocery = await pool.query(
-        'UPDATE groceries SET quantity = quantity + $1, updatedat = NOW() WHERE groceryid = $2 RETURNING *',
-        [value.quantity, existingGrocery.rows[0].groceryid]
-      );
-      return res.status(200).json({ message: 'Grocery updated successfully', grocery: updatedGrocery.rows[0] });
-    } else {
-      // Insert new grocery if it doesn't exist
-      const newGrocery = await pool.query(
-        `INSERT INTO groceries (userid, name, quantity, unit, createdat, updatedat)
-         VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`,
-        [userid, value.name, value.quantity, value.unit]
-      );
-      return res.status(201).json({ message: 'Grocery added successfully', grocery: newGrocery.rows[0] });
+    if (insertError) {
+      console.error("❌ Database error adding grocery:", insertError.message);
+      return res.status(500).json({ error: "Database error" });
     }
-  } catch (err) {
-    console.error('Database error adding/updating grocery:', err.message);
-    res.status(500).json({ error: 'Error adding/updating grocery' });
+
+    res.status(201).json({ message: "✅ Grocery added successfully", grocery: data });
+  } catch (error) {
+    console.error("❌ Error adding grocery:", error.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Update a grocery
-router.put('/:userid/:groceryid', [validateUserId, validateGroceryId], async (req, res) => {
+// ✅ PUT (Update a grocery)
+router.put("/:userid/:groceryid", validateUserId, async (req, res) => {
   const { userid, groceryid } = req.params;
   const { name, quantity, unit } = req.body;
 
-  console.log('User ID in PUT request:', userid);
-  console.log('Grocery ID in PUT request:', groceryid);
+  console.log("🔹 User ID in PUT request:", userid);
+  console.log("🔹 Grocery ID in PUT request:", groceryid);
 
   const { error } = grocerySchema.validate({ name, quantity, unit });
   if (error) {
-    console.error('Validation error:', error.details[0].message);
+    console.error("❌ Validation error:", error.details[0].message);
     return res.status(400).json({ error: error.details[0].message });
   }
 
   try {
-    const result = await pool.query(
-      `UPDATE groceries SET name = $1, quantity = $2, unit = $3, updatedat = NOW()
-       WHERE groceryid = $4 AND userid = $5 RETURNING *`,
-      [name, quantity, unit, groceryid, userid]
-    );
+    const { data, error: updateError } = await supabase
+      .from("groceries")
+      .update({ name, quantity, unit })
+      .eq("groceryid", groceryid)
+      .eq("userid", userid)
+      .select();
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Grocery item not found or not owned by the user' });
+    if (updateError) {
+      console.error("❌ Database error updating grocery:", updateError.message);
+      return res.status(500).json({ error: "Database error" });
     }
 
-    res.status(200).json(result.rows[0]);
+    res.status(200).json({ message: "✅ Grocery updated successfully", grocery: data });
   } catch (error) {
-    console.error('Database error updating grocery:', error.message);
-    res.status(500).json({ error: 'Error updating grocery' });
+    console.error("❌ Error updating grocery:", error.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// Delete a grocery
-router.delete('/:userid/:groceryid', [validateUserId, validateGroceryId], async (req, res) => {
+// ✅ DELETE a grocery
+router.delete("/:userid/:groceryid", validateUserId, async (req, res) => {
   const { userid, groceryid } = req.params;
 
-  console.log('User ID in DELETE request:', userid);
-  console.log('Grocery ID in DELETE request:', groceryid);
+  console.log("🔹 User ID in DELETE request:", userid);
+  console.log("🔹 Grocery ID in DELETE request:", groceryid);
 
   try {
-    const result = await pool.query(
-      'DELETE FROM groceries WHERE groceryid = $1 AND userid = $2 RETURNING *',
-      [groceryid, userid]
-    );
+    const { data, error: deleteError } = await supabase
+      .from("groceries")
+      .delete()
+      .eq("groceryid", groceryid)
+      .eq("userid", userid);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Grocery item not found or not owned by the user' });
+    if (deleteError) {
+      console.error("❌ Database error deleting grocery:", deleteError.message);
+      return res.status(500).json({ error: "Database error" });
     }
 
-    res.status(200).json({ message: 'Grocery deleted successfully', data: result.rows[0] });
+    res.status(200).json({ message: "✅ Grocery deleted successfully", deletedGrocery: data });
   } catch (error) {
-    console.error('Database error deleting grocery:', error.message);
-    res.status(500).json({ error: 'Error deleting grocery' });
+    console.error("❌ Error deleting grocery:", error.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
 

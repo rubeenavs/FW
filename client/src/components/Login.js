@@ -4,16 +4,14 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // New Remember Me state
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const endpoint = isAdmin ? "/admin/login" : "/login";
 
     try {
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
@@ -21,8 +19,21 @@ const Login = ({ onLogin }) => {
 
       if (response.ok) {
         const data = await response.json();
-        onLogin(isAdmin ? "admin" : "user", data.user, rememberMe); // Pass rememberMe
-        navigate(isAdmin ? "/admin-dashboard" : "/user-dashboard");
+        alert("Login successful! Redirecting to dashboard..."); // ✅ Success alert
+
+        // ✅ Redirect based on user role
+        if (data.user.role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/user-dashboard");
+        }
+
+        // ✅ Store session if "Remember Me" is checked
+        if (rememberMe) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+        }
+
+        onLogin(data.user.role, data.user, rememberMe);
       } else {
         const errorData = await response.json();
         alert(errorData.error || "Login failed. Please try again.");
@@ -38,8 +49,8 @@ const Login = ({ onLogin }) => {
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "flex-start", // Align to the top
-      alignItems: "center", // Center horizontally
+      justifyContent: "flex-start",
+      alignItems: "center",
       padding: "20px",
       backgroundColor: "#f9f9f9",
     },
@@ -104,9 +115,6 @@ const Login = ({ onLogin }) => {
       fontWeight: "bold",
       transition: "background-color 0.3s ease",
     },
-    buttonHover: {
-      backgroundColor: "#45a049",
-    },
     actions: {
       marginTop: "20px",
       display: "flex",
@@ -123,14 +131,11 @@ const Login = ({ onLogin }) => {
       fontWeight: "bold",
       transition: "background-color 0.3s ease",
     },
-    secondaryButtonHover: {
-      backgroundColor: "#0056b3",
-    },
   };
 
   return (
     <div style={styles.pageContainer}>
-      <div style={styles.title}>{isAdmin ? "Admin Login" : "User Login"}</div>
+      <div style={styles.title}>User Login</div>
       <div style={styles.container}>
         <form style={styles.form} onSubmit={handleSubmit}>
           <label style={styles.label}>Username:</label>
@@ -159,30 +164,12 @@ const Login = ({ onLogin }) => {
             />
             Remember Me
           </label>
-          <button
-            style={styles.button}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#45a049")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
-            type="submit"
-          >
+          <button style={styles.button} type="submit">
             Login
           </button>
         </form>
         <div style={styles.actions}>
-          <button
-            style={styles.secondaryButton}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#0056b3")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#007BFF")}
-            onClick={() => setIsAdmin(!isAdmin)}
-          >
-            Switch to {isAdmin ? "User Login" : "Admin Login"}
-          </button>
-          <button
-            style={styles.secondaryButton}
-            onMouseOver={(e) => (e.target.style.backgroundColor = "#0056b3")}
-            onMouseOut={(e) => (e.target.style.backgroundColor = "#007BFF")}
-            onClick={() => navigate("/register")}
-          >
+          <button style={styles.secondaryButton} onClick={() => navigate("/register")}>
             Register
           </button>
         </div>
