@@ -3,7 +3,13 @@ import axios from "axios";
 
 function GroceryManager({ userId }) {
     const [groceries, setGroceries] = useState([]);
-    const [newGrocery, setNewGrocery] = useState({ name: "", quantity: "", unit: "kg" });
+    const [newGrocery, setNewGrocery] = useState({
+        name: "",
+        quantity: "",
+        unit: "kg",
+        price: "",
+        date_of_expiry: "",
+    });
 
     useEffect(() => {
         fetchGroceries();
@@ -19,10 +25,10 @@ function GroceryManager({ userId }) {
     };
 
     const handleAddGrocery = async () => {
-        const { name, quantity, unit } = newGrocery;
+        const { name, quantity, unit, price, date_of_expiry } = newGrocery;
 
-        if (!name || !quantity || !unit) {
-            alert("Please fill out all fields.");
+        if (!name || !quantity || !unit || !price) {
+            alert("Please fill out all required fields.");
             return;
         }
 
@@ -31,26 +37,20 @@ function GroceryManager({ userId }) {
                 name: name.trim().toLowerCase(),
                 quantity: parseFloat(quantity),
                 unit,
+                price: parseFloat(price),
+                date_of_expiry: date_of_expiry || null, // Allow null dates
             });
 
             alert(response.data.message);
-            fetchGroceries(); // Refresh the grocery list
-            setNewGrocery({ name: "", quantity: "", unit: "kg" }); // Reset the form
+            fetchGroceries();
+            setNewGrocery({ name: "", quantity: "", unit: "kg", price: "", date_of_expiry: "" });
         } catch (error) {
             console.error("Error adding/updating grocery:", error.response?.data || error.message);
             alert("Failed to add/update grocery.");
         }
     };
 
-    const handleDeleteGrocery = async (groceryId) => {
-        try {
-            await axios.delete(`http://localhost:5000/api/groceries/${userId}/${groceryId}`);
-            fetchGroceries();
-        } catch (error) {
-            console.error("Error deleting grocery:", error.response?.data || error.message);
-        }
-    };
-
+    // ✅ FIX: Styles Object was Missing!
     const styles = {
         container: {
             marginTop: '20px',
@@ -111,29 +111,6 @@ function GroceryManager({ userId }) {
             transition: 'background-color 0.3s ease',
             width: '100%',
         },
-        inventory: {
-            marginTop: '20px',
-            textAlign: 'center',
-        },
-        inventoryTitle: {
-            fontSize: '24px',
-            fontWeight: 'bold',
-            marginBottom: '10px',
-        },
-        groceryItem: {
-            marginBottom: '10px',
-            fontSize: '16px',
-        },
-        deleteButton: {
-            padding: '5px 10px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            color: 'white',
-            backgroundColor: '#FF4D4D',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-        },
     };
 
     return (
@@ -172,6 +149,26 @@ function GroceryManager({ userId }) {
                         <option value="pcs">pcs</option>
                     </select>
                 </div>
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Price</label>
+                    <input
+                        type="number"
+                        placeholder="Enter price"
+                        value={newGrocery.price}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, price: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Expiry Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select expiry date"
+                        value={newGrocery.date_of_expiry}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
                 <button
                     style={styles.button}
                     onClick={handleAddGrocery}
@@ -179,14 +176,8 @@ function GroceryManager({ userId }) {
                     Add Grocery
                 </button>
             </div>
-
-           
-                    
-                
-            </div>
-        
+        </div>
     );
 }
 
 export default GroceryManager;
-
