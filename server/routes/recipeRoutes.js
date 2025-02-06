@@ -1,114 +1,63 @@
 const express = require('express');
-const pool = require('../db');
+const { supabase } = require('../db');
 const router = express.Router();
 
-// Get all recipes
+// ✅ Add a recipe
+router.post('/', async (req, res) => {
+    const { recipe_name, description, instructions, ingredients } = req.body;
+
+    // ✅ Validate required fields
+    if (!recipe_name || !instructions || !Array.isArray(ingredients) || ingredients.length === 0) {
+        console.error("❌ Missing required fields");
+        return res.status(400).json({ error: "Recipe name, instructions, and ingredients are required." });
+    }
+
+    try {
+        console.log("🛠 Adding new recipe:", { recipe_name, description, instructions, ingredients });
+
+        // ✅ Insert into Supabase
+        const { data, error } = await supabase
+            .from("recipes")
+            .insert([
+                {
+                    name: recipe_name,
+                    description,
+                    instructions,
+                    ingredients: JSON.stringify(ingredients) // Convert array to string for storage
+                }
+            ])
+            .select("*"); // Fetch inserted data
+
+        if (error) {
+            console.error("❌ Supabase Insert Error:", error);
+            return res.status(500).json({ error: "Database error", details: error.message });
+        }
+
+        console.log("✅ Recipe added successfully:", data);
+        res.status(201).json({ message: "Recipe added successfully", recipe: data });
+
+    } catch (error) {
+        console.error("❌ Error adding recipe:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+
+    
+});
 router.get('/', async (req, res) => {
     try {
-        const result = await pool.query('SELECT * FROM recipes');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching recipes:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
+        console.log("🛠 Fetching all recipes from Supabase...");
+        const { data, error } = await supabase.from("recipes").select("*");
 
-// Add a recipe
-router.post('/', async (req, res) => {
-    const { recipe_name, description, ingredients } = req.body;
-
-    if (!recipe_name || !Array.isArray(ingredients) || ingredients.length === 0) {
-        return res.status(400).json({ error: 'Recipe name and ingredients are required.' });
-    }
-
-    try {
-        const result = await pool.query(
-            `INSERT INTO recipes (name, description, ingredients, createdat, updatedat)
-             VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *`,
-            [recipe_name, description, JSON.stringify(ingredients)]
-        );
-        res.status(201).json({ message: 'Recipe added successfully', recipe: result.rows[0] });
-    } catch (error) {
-        console.error('Error adding recipe:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// Update a recipe
-router.put('/:id', async (req, res) => {
-    const { id } = req.params;
-    const { recipe_name, description, ingredients } = req.body;
-
-    if (!recipe_name || !Array.isArray(ingredients) || ingredients.length === 0) {
-        return res.status(400).json({ error: 'Recipe name and ingredients are required.' });
-    }
-
-    try {
-        const result = await pool.query(
-            `UPDATE recipes
-             SET name = $1, description = $2, ingredients = $3, updatedat = NOW()
-             WHERE recipeid = $4 RETURNING *`,
-            [recipe_name, description, JSON.stringify(ingredients), id]
-        );
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Recipe not found' });
+        if (error) {
+            console.error("❌ Supabase Fetch Error:", error);
+            return res.status(500).json({ error: "Database error", details: error.message });
         }
-        res.status(200).json({ message: 'Recipe updated successfully', recipe: result.rows[0] });
+
+        console.log("✅ Recipes fetched successfully:", data);
+        res.status(200).json(data);
     } catch (error) {
-        console.error('Error updating recipe:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// Delete a recipe
-router.delete('/:id', async (req, res) => {
-    const { id } = req.params;
-
-    try {
-        const result = await pool.query('DELETE FROM recipes WHERE recipeid = $1 RETURNING *', [id]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Recipe not found' });
-        }
-        res.json({ message: 'Recipe deleted successfully', recipe: result.rows[0] });
-    } catch (error) {
-        console.error('Error deleting recipe:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// Recommended recipes based on groceries
-router.get('/recommended', async (req, res) => {
-    try {
-        const groceriesResult = await pool.query('SELECT name, quantity, unit FROM groceries');
-        const recipesResult = await pool.query('SELECT * FROM recipes');
-
-        const groceries = groceriesResult.rows.map(grocery => ({
-            name: grocery.name.toLowerCase(),
-            quantity: parseFloat(grocery.quantity),
-            unit: grocery.unit.toLowerCase(),
-        }));
-
-        const recipes = recipesResult.rows.map(recipe => ({
-            ...recipe,
-            ingredients: JSON.parse(recipe.ingredients),
-        }));
-
-        const recommendedRecipes = recipes.filter(recipe =>
-            recipe.ingredients.every(ingredient => {
-                const matchingGrocery = groceries.find(
-                    grocery =>
-                        grocery.name === ingredient.ingredient_name.toLowerCase() &&
-                        grocery.unit === ingredient.unit.toLowerCase() &&
-                        grocery.quantity >= parseFloat(ingredient.quantity)
-                );
-                return Boolean(matchingGrocery);
-            })
-        );
-
-        res.json(recommendedRecipes);
-    } catch (error) {
-        console.error('Error fetching recommended recipes:', error.message);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error("❌ Error fetching recipes:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
