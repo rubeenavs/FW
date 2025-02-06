@@ -15,7 +15,7 @@ app.use(express.json());  // ✅ Parse JSON requests
 
 // ✅ Log all incoming requests for debugging
 app.use((req, res, next) => {
-    console.log(`🔹 Incoming request: ${req.method} ${req.url}`);
+    console.log(🔹 Incoming request: ${req.method} ${req.url});
     next();
 });
 
@@ -24,7 +24,7 @@ app.get("/api/health", (req, res) => {
     res.json({ status: "✅ Server is running!" });
 });
 
-// ✅ Mount Routes with `/api` prefix
+// ✅ Mount Routes with /api prefix
 try {
     app.use("/api/groceries", require("./routes/groceryRoutes"));
     app.use("/api/register", require("./routes/registerRoute")); 
@@ -41,18 +41,18 @@ try {
 console.log("\n✅ Registered Routes:");
 app._router.stack.forEach((r) => {
     if (r.route && r.route.path) {
-        console.log(`✔ ${r.route.path}`);
+        console.log(✔ ${r.route.path});
     }
 });
 
 // ❌ Handle undefined routes
 app.use((req, res) => {
-    console.log(`⚠️ Route not found: ${req.method} ${req.url}`);
+    console.log(⚠️ Route not found: ${req.method} ${req.url});
     res.status(404).json({ error: "Route not found" });
 });
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`\n✅ Server running on http://localhost:${PORT}`);
+    console.log(\n✅ Server running on http://localhost:${PORT});
 });
