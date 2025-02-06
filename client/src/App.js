@@ -1,6 +1,5 @@
 import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
-import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Registration";
 import GroceryManager from "./components/GroceryManager";
@@ -19,7 +18,7 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Initialize state from localStorage (Remember Me)
+  
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -142,7 +141,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Home />} />
+          
           <Route
             path="/user-dashboard"
             element={
