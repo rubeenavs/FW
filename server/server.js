@@ -31,6 +31,8 @@ try {
     app.use("/api/login", require("./routes/loginRoute"));       
     app.use("/api/admin", require("./routes/adminRoutes"));      
     app.use("/api/recipes", require("./routes/recipeRoutes"));
+    app.use("/api/users",require("./routes/userRoutes"));
+
 
     console.log("✅ API routes loaded successfully!");
 } catch (error) {

@@ -22,7 +22,7 @@ const Login = ({ onLogin }) => {
         alert("Login successful! Redirecting to dashboard..."); // ✅ Success alert
 
         // ✅ Redirect based on user role
-        if (data.user.role === "admin") {
+        if (data.user.role === "Admin") {
           navigate("/admin-dashboard");
         } else {
           navigate("/user-dashboard");
