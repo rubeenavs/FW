@@ -24,8 +24,10 @@ function RecommendedRecipes() {
                 <ul>
                     {recommendedRecipes.map((recipe) => (
                         <li key={recipe.recipeid}>
-                            <strong>{recipe.name}</strong>
-                            <p>{recipe.description}</p>
+                            <h2>{recipe.name}</h2>
+                            <p><strong>Description:</strong> {recipe.description}</p>
+                            <p><strong>Cooking Time:</strong> {recipe.cooking_time}</p>
+                            <p><strong>Sustainability Notes:</strong> {recipe.sustainability_notes}</p>
                         </li>
                     ))}
                 </ul>

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import RecipeManager from "./RecipeManager";
 import UserManagement from "./UserManagement";
-import Inventory from "./Inventory";
 import logoImage from "./Logo.jpg"; 
+import RecipeInventory from "./RecipeInventory";
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState("recipes");  // Fix: Added state for active tab
@@ -15,7 +15,8 @@ const AdminDashboard = () => {
             case "users":
                 return <UserManagement />;
             case "inventory":
-                return <Inventory />;
+                console.log("Rendering Inventory Component...")
+                return <RecipeInventory />;
             default:
                 return <RecipeManager />;
         }
