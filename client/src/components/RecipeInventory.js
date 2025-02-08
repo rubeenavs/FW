@@ -3,11 +3,16 @@ import axios from "axios";
 
 function RecipeInventory() {
     const [recipes, setRecipes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // ✅ Fetch recipes from backend
     const fetchRecipes = async () => {
+        setLoading(true);
+        setError(null);
         try {
             const response = await axios.get("http://localhost:5000/api/recipes");
+
             console.log("✅ API Response for Recipes:", response.data);
 
             if (!response.data || response.data.length === 0) {
@@ -16,7 +21,10 @@ function RecipeInventory() {
 
             setRecipes(response.data);
         } catch (error) {
-            console.error("❌ Error fetching recipes:", error.message);
+            console.error("❌ Error fetching recipes:", error);
+            setError("Failed to load recipes. Please check the server.");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -37,27 +45,57 @@ function RecipeInventory() {
     // ✅ Handle Edit Recipe
     const handleEditRecipe = (recipe) => {
         console.log("✏️ Edit Recipe:", recipe);
-        // Implement an edit modal or form here if needed
     };
 
     return (
         <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
             <h1 style={{ textAlign: "center", color: "#358856" }}>Inventory</h1>
-            <h2>Recipes</h2>
-            {recipes.length === 0 ? (
+
+            {loading ? (
+                <p>Loading recipes...</p>
+            ) : error ? (
+                <p style={{ color: "red" }}>{error}</p>
+            ) : recipes.length === 0 ? (
                 <p>No recipes found. Start adding items!</p>
             ) : (
                 <ul style={{ listStyleType: "none", padding: 0 }}>
                     {recipes.map((recipe) => (
-                        <li key={recipe.recipeid} style={{ padding: "10px", borderBottom: "1px solid #ddd", display: "flex", justifyContent: "space-between" }}>
+                        <li
+                            key={recipe.recipeid}
+                            style={{
+                                padding: "10px",
+                                borderBottom: "1px solid #ddd",
+                                display: "flex",
+                                justifyContent: "space-between",
+                            }}
+                        >
                             <div>
-                                <strong>{recipe.name}</strong> - {recipe.description}
+                                <strong>{recipe.name.trim()}</strong> - {recipe.description}
                             </div>
                             <div>
-                                <button style={{ marginRight: "10px", padding: "5px 10px", backgroundColor: "#007BFF", color: "#fff", border: "none", borderRadius: "5px" }} onClick={() => handleEditRecipe(recipe)}>
+                                <button
+                                    style={{
+                                        marginRight: "10px",
+                                        padding: "5px 10px",
+                                        backgroundColor: "#007BFF",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                    }}
+                                    onClick={() => handleEditRecipe(recipe)}
+                                >
                                     Edit
                                 </button>
-                                <button style={{ padding: "5px 10px", backgroundColor: "#FF4D4D", color: "#fff", border: "none", borderRadius: "5px" }} onClick={() => handleDeleteRecipe(recipe.recipeid)}>
+                                <button
+                                    style={{
+                                        padding: "5px 10px",
+                                        backgroundColor: "#FF4D4D",
+                                        color: "#fff",
+                                        border: "none",
+                                        borderRadius: "5px",
+                                    }}
+                                    onClick={() => handleDeleteRecipe(recipe.recipeid)}
+                                >
                                     Delete
                                 </button>
                             </div>

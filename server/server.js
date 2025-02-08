@@ -1,21 +1,22 @@
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config(); 
+require("dotenv").config();
 const { supabase } = require("./db");
 const app = express();
 
 // ✅ Middleware - CORS Configuration
 app.use(cors({
-    origin: "http://localhost:3000", 
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
 }));
 
-app.use(express.json());  // ✅ Parse JSON requests
+app.use(express.json()); // ✅ Parse JSON requests
 
 // ✅ Log all incoming requests for debugging
 app.use((req, res, next) => {
-    console.log(🔹 Incoming request: ${req.method} ${req.url});
+    console.log(`🔹 Incoming request: ${req.method} ${req.url}`);
     next();
 });
 
@@ -24,14 +25,16 @@ app.get("/api/health", (req, res) => {
     res.json({ status: "✅ Server is running!" });
 });
 
-// ✅ Mount Routes with /api prefix
+// ✅ Load Routes with Static Requires
 try {
     app.use("/api/groceries", require("./routes/groceryRoutes"));
-    app.use("/api/register", require("./routes/registerRoute")); 
-    app.use("/api/login", require("./routes/loginRoute"));       
-    app.use("/api/admin", require("./routes/adminRoutes"));      
+    app.use("/api/register", require("./routes/registerRoute"));
+    app.use("/api/login", require("./routes/loginRoute"));  // 🔹 FIXED!
+    app.use("/api/admin", require("./routes/adminRoutes"));
     app.use("/api/recipes", require("./routes/recipeRoutes"));
-    app.use("/api/users",require("./routes/userRoutes"));
+    app.use("/api/users", require("./routes/userRoutes"));
+    app.use("/api/cook", require("./routes/cookRoutes"));
+    app.use("/api/recommendations", require("./routes/recommendationRoutes"));
 
 
     console.log("✅ API routes loaded successfully!");
@@ -39,22 +42,30 @@ try {
     console.error("❌ Error loading routes:", error);
 }
 
-// ✅ Debug: Print all registered routes
-console.log("\n✅ Registered Routes:");
-app._router.stack.forEach((r) => {
-    if (r.route && r.route.path) {
-        console.log(✔ ${r.route.path});
-    }
-});
-
 // ❌ Handle undefined routes
 app.use((req, res) => {
-    console.log(⚠️ Route not found: ${req.method} ${req.url});
+    console.log(`⚠️ Route not found: ${req.method} ${req.url}`);
     res.status(404).json({ error: "Route not found" });
 });
 
 // ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(\n✅ Server running on http://localhost:${PORT});
+    console.log(`\n✅ Server running on http://localhost:${PORT}`);
 });
+
+// ✅ Debug: Print all loaded routes
+console.log("\n✅ Checking loaded routes:");
+app._router.stack.forEach((layer) => {
+    if (layer.route) {
+        console.log(`✔ ${Object.keys(layer.route.methods)[0].toUpperCase()} ${layer.route.path}`);
+    } else if (layer.name === "router") {
+        layer.handle.stack.forEach((nestedLayer) => {
+            if (nestedLayer.route) {
+                console.log(`✔ ${Object.keys(nestedLayer.route.methods)[0].toUpperCase()} ${nestedLayer.route.path}`);
+            }
+        });
+    }
+});
+console.log("✅ Route check complete\n");
+

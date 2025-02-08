@@ -11,35 +11,43 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
 
     try {
+      console.log("🔍 Sending login request...");
       const response = await fetch("http://localhost:5000/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        alert("Login successful! Redirecting to dashboard..."); // ✅ Success alert
+      console.log("✅ Response Status:", response.status);
+      const responseText = await response.text();
+      console.log("✅ Raw Response Text:", responseText);
 
-        // ✅ Redirect based on user role
-        if (data.user.role === "Admin") {
-          navigate("/admin-dashboard");
-        } else {
-          navigate("/user-dashboard");
-        }
+      const data = JSON.parse(responseText);
+      console.log("✅ Parsed Response Data:", data);
 
-        // ✅ Store session if "Remember Me" is checked
-        if (rememberMe) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-        }
-
-        onLogin(data.user.role, data.user, rememberMe);
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || "Login failed. Please try again.");
+      if (!response.ok) {
+        console.log("❌ Login failed:", data.error || "Unknown error");
+        alert(data.error || "Login failed. Please try again.");
+        return;
       }
+
+      alert("Login successful! Redirecting to dashboard...");
+
+      // ✅ Redirect based on user role
+      if (data.user.role === "Admin") {
+        navigate("/admin-dashboard");
+      } else {
+        navigate("/user-dashboard");
+      }
+
+      // ✅ Store session if "Remember Me" is checked
+      if (rememberMe) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
+
+      onLogin(data.user.role, data.user, rememberMe);
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
       alert("An error occurred while logging in. Please try again later.");
     }
   };

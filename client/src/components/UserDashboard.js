@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import GroceryManager from './GroceryManager';
 import Inventory from './Inventory';
-import Calculator from './Calculator';
+import Calculator from './CookingManager';
 import { AuthContext } from '../App';
 import bgImage from './user_pic.webp'; 
 import logoImage from './Logo.jpg'; 
@@ -21,7 +21,7 @@ const UserDashboard = () => {
             case 'inventory':
                 return <Inventory userId={user.id} />; 
             case 'calculation':
-                return <Calculator />;
+                return <Calculator userId={user.id}/>;
             default:
                 return null;
         }

@@ -9,6 +9,7 @@ function GroceryManager({ userId }) {
         unit: "kg",
         price: "",
         date_of_expiry: "",
+        date_of_purchase: "",
     });
 
     useEffect(() => {
@@ -25,32 +26,34 @@ function GroceryManager({ userId }) {
     };
 
     const handleAddGrocery = async () => {
-        const { name, quantity, unit, price, date_of_expiry } = newGrocery;
+        const { name, quantity, unit, price, date_of_expiry, date_of_purchase } = newGrocery;
 
-        if (!name || !quantity || !unit || !price) {
+        if (!name || !quantity || !unit || !price || !date_of_purchase) {
             alert("Please fill out all required fields.");
             return;
         }
 
         try {
-            const response = await axios.post(`http://localhost:5000/api/groceries/${userId}`, {
+            const formattedGrocery = {
                 name: name.trim().toLowerCase(),
                 quantity: parseFloat(quantity),
                 unit,
                 price: parseFloat(price),
-                date_of_expiry: date_of_expiry || null, // Allow null dates
-            });
+                date_of_expiry: date_of_expiry ? new Date(date_of_expiry).toISOString().split("T")[0] : null,
+                date_of_purchase: new Date(date_of_purchase).toISOString().split("T")[0], // ✅ Ensuring correct format
+            };
+
+            const response = await axios.post(`http://localhost:5000/api/groceries/${userId}`, formattedGrocery);
 
             alert(response.data.message);
             fetchGroceries();
-            setNewGrocery({ name: "", quantity: "", unit: "kg", price: "", date_of_expiry: "" });
+            setNewGrocery({ name: "", quantity: "", unit: "kg", price: "", date_of_expiry: "", date_of_purchase: "" });
         } catch (error) {
             console.error("Error adding/updating grocery:", error.response?.data || error.message);
             alert("Failed to add/update grocery.");
         }
     };
 
-    // ✅ FIX: Styles Object was Missing!
     const styles = {
         container: {
             marginTop: '20px',
@@ -166,6 +169,16 @@ function GroceryManager({ userId }) {
                         placeholder="Select expiry date"
                         value={newGrocery.date_of_expiry}
                         onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Purchase Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select purchase date"
+                        value={newGrocery.date_of_purchase}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_purchase: e.target.value })}
                         style={styles.input}
                     />
                 </div>

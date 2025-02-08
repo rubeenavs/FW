@@ -43,22 +43,34 @@ router.post('/', async (req, res) => {
 
     
 });
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         console.log("🛠 Fetching all recipes from Supabase...");
-        const { data, error } = await supabase.from("recipes").select("*");
+        const { data, error } = await supabase
+            .from("recipes")
+            .select("recipeid, name, description, instructions, ingredients");
 
         if (error) {
             console.error("❌ Supabase Fetch Error:", error);
             return res.status(500).json({ error: "Database error", details: error.message });
         }
 
-        console.log("✅ Recipes fetched successfully:", data);
-        res.status(200).json(data);
+        
+        const cleanedData = data.map((recipe) => ({
+            recipeid: recipe.recipeid,
+            name: recipe.name.trim(), 
+            description: recipe.description || "No description",
+            instructions: recipe.instructions || "No instructions provided",
+            ingredients: JSON.parse(recipe.ingredients || "[]"), 
+        }));
+
+        console.log("✅ Cleaned Recipes Data:", cleanedData);
+        res.status(200).json(cleanedData);
     } catch (error) {
         console.error("❌ Error fetching recipes:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 module.exports = router;

@@ -4,7 +4,7 @@ import Login from "./components/Login";
 import Register from "./components/Registration";
 import GroceryManager from "./components/GroceryManager";
 import RecipeManager from "./components/RecipeManager";
-import Calculator from "./components/Calculator";
+import CookingManager from "./components/CookingManager"; // Renamed from Calculator
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import UserManagement from "./components/UserManagement";
@@ -18,7 +18,6 @@ function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
 
-  
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -54,7 +53,7 @@ function App() {
 
   const handleLogin = (role, loggedInUser, rememberMe) => {
     setIsAuthenticated(true);
-    setIsAdmin(role === "admin");
+    setIsAdmin(role === "Admin");
     setUser(loggedInUser);
 
     try {
@@ -85,11 +84,11 @@ function App() {
     }
   };
 
-  const ProtectedRoute = ({ children, role }) => {
+  const ProtectedRoute = ({ children, requiredRole }) => {
     if (!isAuthenticated) {
       return <Navigate to="/login" />;
     }
-    if (role === "admin" && !isAdmin) {
+    if (requiredRole === "Admin" && !isAdmin) {
       return <Navigate to="/" />;
     }
     return children;
@@ -138,14 +137,17 @@ function App() {
             <Link to="/login">Login</Link>
           )}
         </div>
+
         <Routes>
+          {/* Public Routes */}
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register />} />
-          
+
+          {/* User Protected Routes */}
           <Route
             path="/user-dashboard"
             element={
-              <ProtectedRoute role="user">
+              <ProtectedRoute requiredRole="user">
                 <UserDashboard />
               </ProtectedRoute>
             }
@@ -153,31 +155,33 @@ function App() {
           <Route
             path="/groceries"
             element={
-              <ProtectedRoute role="user">
+              <ProtectedRoute requiredRole="user">
                 <GroceryManager />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/calculator"
+            path="/cooking"
             element={
-              <ProtectedRoute role="user">
-                <Calculator />
+              <ProtectedRoute requiredRole="user">
+                <CookingManager />
               </ProtectedRoute>
             }
           />
           <Route
             path="/recommended-recipes"
             element={
-              <ProtectedRoute role="user">
+              <ProtectedRoute requiredRole="user">
                 <RecommendedRecipes />
               </ProtectedRoute>
             }
           />
+
+          {/* Admin Protected Routes */}
           <Route
-            path="/admin-dashboard"
+            path="/admin-dashboard/*"
             element={
-              <ProtectedRoute role="admin">
+              <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -186,6 +190,8 @@ function App() {
             <Route path="manage-users" element={<UserManagement />} />
             <Route path="inventory" element={<RecipeInventory />} />
           </Route>
+
+          {/* Redirect all unknown routes to login */}
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </Router>

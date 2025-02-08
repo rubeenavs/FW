@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaTrash } from "react-icons/fa"; // Import trash bin icon
+import { FaTrash } from "react-icons/fa"; 
 
 function RecipeManager({ onRecipeAdded }) {
   const [newRecipe, setNewRecipe] = useState({
@@ -15,7 +15,7 @@ function RecipeManager({ onRecipeAdded }) {
     unit: "kg",
   });
 
-  // Add ingredient to the list
+  
   const addIngredient = () => {
     if (ingredient.ingredient_name && ingredient.quantity) {
       setNewRecipe((prev) => ({
@@ -65,7 +65,6 @@ function RecipeManager({ onRecipeAdded }) {
     }
   };
 
-  // ✅ OLD CSS MAINTAINED
   const styles = {
     pageContainer: {
       minHeight: "100vh",
@@ -217,7 +216,7 @@ function RecipeManager({ onRecipeAdded }) {
             Add Ingredient
           </button>
 
-          {/* Display added ingredients with delete (waste bin) buttons */}
+          
           <ul style={styles.ingredientsList}>
             {newRecipe.ingredients.map((ing, index) => (
               <li key={index} style={styles.ingredientItem}>

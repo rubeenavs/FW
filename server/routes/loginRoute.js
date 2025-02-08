@@ -29,12 +29,23 @@ router.post("/", async (req, res) => {
         }
 
         if (!user) {
-            console.log("❌ User not found");
+            console.log("❌ User not found in Supabase");
             return res.status(401).json({ error: "Invalid username or password" });
         }
 
         console.log("🔹 Verifying password...");
+
+        if (!user.password) {
+            console.error("❌ User exists but has NO password stored.");
+            return res.status(500).json({ error: "Internal error: Password missing" });
+        }
+
+        console.log("🔍 User Password from DB:", user.password);
+        console.log("🔍 Password entered:", password);
+
         const isPasswordValid = await bcrypt.compare(password, user.password);
+        console.log("🔍 Password Match:", isPasswordValid);
+
         if (!isPasswordValid) {
             console.log("❌ Invalid password");
             return res.status(401).json({ error: "Invalid username or password" });
@@ -43,7 +54,7 @@ router.post("/", async (req, res) => {
         console.log("✅ Login successful");
         res.status(200).json({
             message: "Login successful",
-            user: { id: user.userid, username: user.username, email: user.email, role: user.role }, // ✅ Return role
+            user: { id: user.userid, username: user.username, email: user.email, role: user.role }, 
         });
 
     } catch (error) {
