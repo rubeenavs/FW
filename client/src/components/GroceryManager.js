@@ -40,7 +40,7 @@ function GroceryManager({ userId }) {
                 unit,
                 price: parseFloat(price),
                 date_of_expiry: date_of_expiry ? new Date(date_of_expiry).toISOString().split("T")[0] : null,
-                date_of_purchase: new Date(date_of_purchase).toISOString().split("T")[0], // ✅ Ensuring correct format
+                date_of_purchase: new Date(date_of_purchase).toISOString().split("T")[0],
             };
 
             const response = await axios.post(`http://localhost:5000/api/groceries/${userId}`, formattedGrocery);
@@ -55,71 +55,135 @@ function GroceryManager({ userId }) {
     };
 
     const styles = {
-        container: {
-            marginTop: '20px',
-            padding: '20px',
-            backgroundColor: 'white',
-            borderRadius: '10px',
-            boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
-            width: '70%',
-            maxWidth: '400px',
-            margin: '0 auto',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+        pageContainer: {
+            background: "linear-gradient(to bottom, #f5f5dc, #3a6b51)",
+            fontFamily: "'Shadows Into Light', cursive",
+            minHeight: "360vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            position: "relative",
+        },
+        trackBox: {
+            background: "#2e856e",
+            padding: "20px 20px",
+            fontSize: "50px",
+            fontWeight: "bold",
+            color: "white",
+            position: "absolute",
+            textAlign: "center",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+            top:"28%",
+        },
+        imageContainer: {
+            marginTop: "-435px",
+            display: "flex",
+            flexDirection: "column", // Stack images vertically
+            alignItems: "center", // Center images horizontally
+            //gap: "20px", // Adds space between the two images
+        },
+        coupleImage: {
+            width: "103%",
+            height: "auto",
+            borderRadius: "3px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
         },
         title: {
-            fontSize: '36px',
-            fontWeight: 'bold',
-            color: '#358856',
-            textAlign: 'center',
-            marginBottom: '20px',
+            fontFamily: "'Shadows Into Light', cursive",
+            fontSize: "40px",
+            fontWeight: "bold",
+            color: "#358856",
+            textAlign: "center",
+            marginBottom: "10px",
+            textTransform: "uppercase",
+            position: "absolute",
+            top: "0%",
+            left: "50%",
+            transform: "translateX(-50%)",
+        },
+        container: {
+            background: "#1e3a34",
+            padding: "40px",
+            borderRadius: "20px",
+            boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.3)",
+            maxWidth: "450px",
+            textAlign: "center",
+            marginTop:"-100%",
+            
         },
         formGroup: {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            marginBottom: '15px',
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: "25px",
+            width: "100%",
         },
         label: {
-            fontSize: '16px',
-            fontWeight: 'bold',
-            marginBottom: '5px',
+            fontFamily: "'Shadows Into Light', cursive",
+            fontSize: "18px",
+            fontWeight: "bold",
+            marginBottom: "5px",
+            color: "#f5f5dc",
         },
         input: {
-            padding: '8px',
-            fontSize: '14px',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
-            marginBottom: '10px',
-            width: '100%',
+            fontFamily: "'Shadows Into Light', cursive",
+            padding: "10px",
+            fontSize: "16px",
+            border: "2px solid #ccc",
+            borderRadius: "8px",
+            marginBottom: "10px",
+            width: "100%",
+            background: "#e0e0d1",
+            color: "#1e3a34",
         },
         select: {
-            padding: '8px',
-            fontSize: '14px',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
-            marginBottom: '10px',
-            width: '100%',
+            fontFamily: "'Shadows Into Light', cursive",
+            padding: "10px",
+            fontSize: "16px",
+            border: "2px solid #ccc",
+            borderRadius: "8px",
+            marginBottom: "10px",
+            width: "100%",
+            background: "#e0e0d1",
+            color: "#1e3a34",
         },
         button: {
-            padding: '8px 16px',
-            fontSize: '14px',
-            fontWeight: 'bold',
-            color: 'white',
-            backgroundColor: '#007BFF',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            transition: 'background-color 0.3s ease',
-            width: '100%',
+            fontFamily: "'Shadows Into Light', cursive",
+            padding: "12px 20px",
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "white",
+            backgroundColor: "#2e856e",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+            width: "100%",
+        },
+        buttonHover: {
+            backgroundColor: "#1e3a34",
+            transform: "scale(1.05)",
         },
     };
 
     return (
-        <div>
+        <div style={styles.pageContainer}>
+            {/* Green Box - TRACK YOUR GROCERIES */}
+            <div style={styles.trackBox}>START ADDING YOUR GROCERIES HERE</div>
+
+            {/* Title - Moved to Top Center */}
             <h1 style={styles.title}>Grocery Manager</h1>
-            <div style={styles.container}>
+
+            {/* Images - One Below the Other */}
+            <div style={styles.imageContainer}>
+                <img src="/images/coupleimage.jpg" alt="Couple Cooking" style={styles.coupleImage} />
+                <img src="/images/9.jpg" alt="Additional Image" style={styles.coupleImage} />
+            </div>
+
+             {/* Grocery Form */}
+             <div style={styles.container}>
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Grocery Name</label>
                     <input
@@ -130,6 +194,7 @@ function GroceryManager({ userId }) {
                         style={styles.input}
                     />
                 </div>
+
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Quantity</label>
                     <input
@@ -140,6 +205,7 @@ function GroceryManager({ userId }) {
                         style={styles.input}
                     />
                 </div>
+
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Unit</label>
                     <select
@@ -150,8 +216,10 @@ function GroceryManager({ userId }) {
                         <option value="kg">kg</option>
                         <option value="g">g</option>
                         <option value="pcs">pcs</option>
+                        <option value="L">L</option>
                     </select>
                 </div>
+
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Price</label>
                     <input
@@ -162,16 +230,7 @@ function GroceryManager({ userId }) {
                         style={styles.input}
                     />
                 </div>
-                <div style={styles.formGroup}>
-                    <label style={styles.label}>Expiry Date</label>
-                    <input
-                        type="date"
-                        placeholder="Select expiry date"
-                        value={newGrocery.date_of_expiry}
-                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
-                        style={styles.input}
-                    />
-                </div>
+
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Purchase Date</label>
                     <input
@@ -182,9 +241,25 @@ function GroceryManager({ userId }) {
                         style={styles.input}
                     />
                 </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Expiry Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select expiry date"
+                        value={newGrocery.date_of_expiry}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                
+
                 <button
                     style={styles.button}
                     onClick={handleAddGrocery}
+                    onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+                    onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                 >
                     Add Grocery
                 </button>
@@ -194,3 +269,4 @@ function GroceryManager({ userId }) {
 }
 
 export default GroceryManager;
+
