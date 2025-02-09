@@ -35,13 +35,12 @@ function CookingManager({ userId }) {
     };
     
 
-    
     const handleCook = async () => {
         if (!selectedRecipe || !pax) {
             alert("Please select a recipe and enter the number of pax.");
             return;
         }
-
+    
         try {
             const response = await axios.post("http://localhost:5000/api/cook", {
                 userid: userId,
@@ -49,13 +48,14 @@ function CookingManager({ userId }) {
                 pax: parseInt(pax),
                 ingredientsUsed: selectedRecipe.grocerymatched
             });
-
+    
             alert(response.data.message);
-            fetchRecommendations(); 
+            fetchRecommendations(); // Refresh recommendations
         } catch (error) {
-            console.error("Error cooking recipe:", error.response?.data || error.message);
+            console.error("❌ Error cooking recipe:", error.response?.data || error.message);
         }
     };
+    
 
     
     const handleWasteSubmit = async () => {

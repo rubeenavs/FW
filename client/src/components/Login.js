@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import logoImage from "./Logo.jpg";  // ✅ Import Logo
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -9,7 +10,6 @@ const Login = ({ onLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       console.log("🔍 Sending login request...");
       const response = await fetch("http://localhost:5000/api/login", {
@@ -33,14 +33,12 @@ const Login = ({ onLogin }) => {
 
       alert("Login successful! Redirecting to dashboard...");
 
-      // ✅ Redirect based on user role
       if (data.user.role === "Admin") {
         navigate("/admin-dashboard");
       } else {
         navigate("/user-dashboard");
       }
 
-      // ✅ Store session if "Remember Me" is checked
       if (rememberMe) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
@@ -62,6 +60,18 @@ const Login = ({ onLogin }) => {
       padding: "20px",
       backgroundColor: "#f9f9f9",
     },
+    logoContainer: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "10px", 
+      marginBottom: "10px",
+    },
+    logo: {
+      height: "60px",
+      width: "60px",
+      borderRadius: "100%",
+    },
     title: {
       fontSize: "36px",
       color: "#ffffff",
@@ -70,7 +80,6 @@ const Login = ({ onLogin }) => {
       padding: "10px 20px",
       borderRadius: "10px",
       textAlign: "center",
-      marginBottom: "20px",
       width: "fit-content",
     },
     container: {
@@ -143,7 +152,12 @@ const Login = ({ onLogin }) => {
 
   return (
     <div style={styles.pageContainer}>
-      <div style={styles.title}>User Login</div>
+      {/* ✅ Logo and "User Login" text together */}
+      <div style={styles.logoContainer}>
+        <img src={logoImage} alt="Logo" style={styles.logo} />
+        <div style={styles.title}>User Login</div>
+      </div>
+
       <div style={styles.container}>
         <form style={styles.form} onSubmit={handleSubmit}>
           <label style={styles.label}>Username:</label>
