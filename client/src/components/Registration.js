@@ -8,7 +8,9 @@ const Register = () => {
   const [role, setRole] = useState("user"); // Default role is "user"
   const navigate = useNavigate();
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault(); // Prevent form submission
+
     if (!username || !password || !email || !role) {
       alert("All fields are required!");
       return;
@@ -18,7 +20,7 @@ const Register = () => {
       const response = await fetch("http://localhost:5000/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, email, role }), // Include role
+        body: JSON.stringify({ username, password, email, role }),
       });
 
       if (!response.ok) {
@@ -38,9 +40,10 @@ const Register = () => {
     <div style={styles.pageContainer}>
       <div style={styles.title}>Register</div>
       <div style={styles.container}>
-        <form style={styles.form}>
-          <label style={styles.label}>Username:</label>
+        <form style={styles.form} onSubmit={handleRegister}>
+          <label htmlFor="username" style={styles.label}>Username:</label>
           <input
+            id="username"
             type="text"
             placeholder="Enter your username"
             value={username}
@@ -48,8 +51,9 @@ const Register = () => {
             style={styles.input}
             required
           />
-          <label style={styles.label}>Password:</label>
+          <label htmlFor="password" style={styles.label}>Password:</label>
           <input
+            id="password"
             type="password"
             placeholder="Enter your password"
             value={password}
@@ -57,8 +61,9 @@ const Register = () => {
             style={styles.input}
             required
           />
-          <label style={styles.label}>Email:</label>
+          <label htmlFor="email" style={styles.label}>Email:</label>
           <input
+            id="email"
             type="email"
             placeholder="Enter your email"
             value={email}
@@ -66,8 +71,9 @@ const Register = () => {
             style={styles.input}
             required
           />
-          <label style={styles.label}>Role:</label>
+          <label htmlFor="role" style={styles.label}>Role:</label>
           <select
+            id="role"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             style={styles.input}
@@ -76,8 +82,8 @@ const Register = () => {
             <option value="admin">Admin</option>
           </select>
           <button
+            type="submit"
             style={styles.button}
-            onClick={handleRegister}
           >
             Register
           </button>
@@ -95,34 +101,37 @@ const Register = () => {
   );
 };
 
-// ✅ Styles Object (Maintaining Old CSS)
+// Styles Object
 const styles = {
   pageContainer: {
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     alignItems: "center",
-    padding: "20px",
-    backgroundColor: "#f9f9f9",
+    background: "linear-gradient(135deg, #a9d08e, #f5f5dc)",
+    padding: "0 20px",
+    fontFamily: "'Arial', sans-serif",
   },
   title: {
-    fontSize: "36px",
-    color: "#ffffff",
+    fontFamily: "'Shadows Into Light', cursive",
+    fontSize: "40px",
     fontWeight: "bold",
-    backgroundColor: "#358856",
-    padding: "10px 20px",
-    borderRadius: "10px",
+    color: "#358856",
     textAlign: "center",
-    marginBottom: "20px",
-    width: "fit-content",
+    marginBottom: "10px",
+    textTransform: "uppercase",
+    position: "absolute",
+    top: "5%",
+    left: "50%",
+    transform: "translateX(-50%)",
   },
   container: {
     width: "500px",
     padding: "30px",
-    border: "2px solid #ccc",
-    borderRadius: "10px",
-    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+    border: "1px solid #ddd",
+    borderRadius: "15px",
+    boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.1)",
     backgroundColor: "#ffffff",
     marginTop: "20px",
   },
@@ -142,26 +151,23 @@ const styles = {
   input: {
     width: "95%",
     margin: "10px 0",
-    padding: "12px",
+    padding: "15px",
     fontSize: "16px",
-    border: "1px solid #ccc",
-    borderRadius: "5px",
+    border: "1px solid #ddd",
+    borderRadius: "8px",
   },
   button: {
     width: "100%",
-    padding: "12px 20px",
+    padding: "10px 15px",
     fontSize: "18px",
-    color: "#fff",
-    backgroundColor: "#4CAF50",
+    fontWeight: "bold",
+    color: "white",
+    backgroundColor: "#2e856e",
     border: "none",
     borderRadius: "5px",
-    cursor: "pointer",
     marginTop: "10px",
-    fontWeight: "bold",
-    transition: "background-color 0.3s ease",
-  },
-  buttonHover: {
-    backgroundColor: "#45a049",
+    cursor: "pointer",
+    transition: "opacity 0.3s ease",
   },
   actions: {
     marginTop: "20px",
@@ -169,12 +175,12 @@ const styles = {
     justifyContent: "center",
   },
   secondaryButton: {
-    padding: "12px 20px",
+    padding: "15px 30px",
     fontSize: "16px",
-    color: "#fff",
-    backgroundColor: "#007BFF",
-    border: "none",
-    borderRadius: "5px",
+    color: "#358856",
+    backgroundColor: "#fff",
+    border: "1px solid #4CAF50",
+    borderRadius: "8px",
     cursor: "pointer",
     fontWeight: "bold",
     transition: "background-color 0.3s ease",

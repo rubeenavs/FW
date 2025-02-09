@@ -31,14 +31,6 @@ const Login = ({ onLogin }) => {
         return;
       }
 
-      // If the backend indicates a forced password change, redirect to Change Password page.
-      if (data.forceChange) {
-        alert(data.message);
-        // Pass the user's id as a URL parameter so the ChangePassword component knows which user to update.
-        navigate(`/change-password/${data.user.id}`);
-        return;
-      }
-
       alert("Login successful! Redirecting to dashboard...");
 
       if (data.user.role === "Admin") {
@@ -63,143 +55,168 @@ const Login = ({ onLogin }) => {
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column",
-      justifyContent: "flex-start",
+      justifyContent: "center",
       alignItems: "center",
-      padding: "20px",
-      backgroundColor: "#f9f9f9",
+      background: "linear-gradient(135deg, #a9d08e, #f5f5dc)", // Green and beige gradient
+      padding: "0 20px",
+      fontFamily: "'Arial', sans-serif", // A clean sans-serif font for modern look
     },
     logoContainer: {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      gap: "10px", 
-      marginBottom: "10px",
+      gap: "15px",
+      marginBottom: "30px",
     },
     logo: {
-      height: "60px",
-      width: "60px",
-      borderRadius: "100%",
+      height: "100px",
+      width: "100px",
+      borderRadius: "50%",
+      objectFit: "cover",
     },
     title: {
-      fontSize: "36px",
-      color: "#ffffff",
+      fontFamily: "'Shadows Into Light', cursive",
+      fontSize: "40px",
       fontWeight: "bold",
-      backgroundColor: "#358856",
-      padding: "10px 20px",
-      borderRadius: "10px",
+      color: "#358856",
       textAlign: "center",
-      width: "fit-content",
+      marginBottom: "10px",
+      textTransform: "uppercase",
+      position: "absolute",
+      top: "5%",
+      left: "50%",
+      transform: "translateX(-50%)",
+
     },
     container: {
-      width: "500px",
+      width: "400px",
       padding: "30px",
-      border: "2px solid #ccc",
-      borderRadius: "10px",
-      boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+      border: "1px solid #ddd",
+      borderRadius: "15px",
+      boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.1)",
       backgroundColor: "#ffffff",
       marginTop: "20px",
     },
     form: {
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
+      gap: "20px",
     },
     label: {
-      alignSelf: "flex-start",
-      marginLeft: "10px",
       fontSize: "18px",
       color: "#555",
-      marginBottom: "5px",
       fontWeight: "bold",
     },
     input: {
-      width: "95%",
-      margin: "10px 0",
-      padding: "12px",
+      padding: "15px",
       fontSize: "16px",
-      border: "1px solid #ccc",
-      borderRadius: "5px",
+      border: "1px solid #ddd",
+      borderRadius: "8px",
+      outline: "none",
+      transition: "border-color 0.3s ease",
+    },
+    inputFocus: {
+      borderColor: "#4CAF50",
     },
     rememberMe: {
       display: "flex",
       alignItems: "center",
-      margin: "10px 0",
       fontSize: "16px",
       color: "#555",
     },
     button: {
       width: "100%",
-      padding: "12px 20px",
+      padding: "10px 15px",
       fontSize: "18px",
-      color: "#fff",
-      backgroundColor: "#4CAF50",
+      fontWeight: "bold",
+      color: "white",
+      backgroundColor: "#2e856e",
       border: "none",
       borderRadius: "5px",
       cursor: "pointer",
-      marginTop: "10px",
-      fontWeight: "bold",
-      transition: "background-color 0.3s ease",
+      transition: "opacity 0.3s ease",
+    },
+    buttonHover: {
+      backgroundColor: "#45a049", // Darker green on hover
     },
     actions: {
       marginTop: "20px",
       display: "flex",
-      justifyContent: "space-between",
+      justifyContent: "center",
     },
     secondaryButton: {
-      padding: "12px 20px",
+      padding: "15px 30px",
       fontSize: "16px",
-      color: "#fff",
-      backgroundColor: "#007BFF",
-      border: "none",
-      borderRadius: "5px",
+      color: "#358856",
+      backgroundColor: "#fff",
+      border: "1px solid #4CAF50",
+      borderRadius: "8px",
       cursor: "pointer",
       fontWeight: "bold",
       transition: "background-color 0.3s ease",
+    },
+    secondaryButtonHover: {
+      backgroundColor: "#4CAF50",
+      color: "#fff",
     },
   };
 
   return (
     <div style={styles.pageContainer}>
-      {/* ✅ Logo and "User Login" text together */}
+      {/* Logo and Title */}
       <div style={styles.logoContainer}>
         <img src={logoImage} alt="Logo" style={styles.logo} />
-        <div style={styles.title}>User Login</div>
+        <div style={styles.title}>Login / Sign up </div>
       </div>
 
       <div style={styles.container}>
         <form style={styles.form} onSubmit={handleSubmit}>
-          <label style={styles.label}>Username:</label>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={styles.input}
-            required
-          />
-          <label style={styles.label}>Password:</label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
-            required
-          />
-          <label style={styles.rememberMe}>
+          <div>
+            <label style={styles.label}>Username : </label>
+            <input
+              type="text"
+              placeholder="Enter your username "
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
+          <div>
+            <label style={styles.label}>Password : </label>
+            <input
+              type="password"
+              placeholder="Enter your password "
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
+          <div style={styles.rememberMe}>
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
             Remember Me
-          </label>
-          <button style={styles.button} type="submit">
+          </div>
+          <button
+            style={styles.button}
+            type="submit"
+            onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+            onMouseOut={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+          >
             Login
           </button>
         </form>
         <div style={styles.actions}>
-          <button style={styles.secondaryButton} onClick={() => navigate("/register")}>
+          <button
+            style={styles.secondaryButton}
+            onClick={() => navigate("/register")}
+            onMouseOver={(e) => (e.target.style.backgroundColor = styles.secondaryButtonHover.backgroundColor)}
+            onMouseOut={(e) => (e.target.style.backgroundColor = "#fff")}
+          >
             Register
           </button>
         </div>
