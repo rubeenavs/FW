@@ -82,9 +82,15 @@ function RecipeInventory() {
                             <p><strong>Sustainability Notes:</strong> {recipe.sustainability_notes}</p>
                             <p><strong>Ingredients:</strong></p>
                             <ul>
-                                {recipe.ingredients.map((ingredient, idx) => (
-                                    <li key={idx}>{ingredient.ingredient_name} - {ingredient.quantity} {ingredient.unit}</li>
-                                ))}
+                            {recipe.ingredients && Array.isArray(recipe.ingredients) ? (
+        recipe.ingredients.map((ingredient, idx) => (
+            <li key={idx}>
+                {ingredient.ingredient_name} - {ingredient.quantity} {ingredient.unit}
+            </li>
+        ))
+    ) : (
+        <p>No ingredients available</p>
+    )}
                             </ul>
                             <button onClick={() => handleEditRecipe(recipe)} style={{ marginRight: "10px", padding: "5px 10px", backgroundColor: "#007BFF", color: "#fff", border: "none", borderRadius: "5px" }}>Edit</button>
                             <button onClick={() => handleDeleteRecipe(recipe.recipeid)} style={{ padding: "5px 10px", backgroundColor: "#FF4D4D", color: "#fff", border: "none", borderRadius: "5px" }}>Delete</button>

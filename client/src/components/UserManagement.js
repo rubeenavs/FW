@@ -51,9 +51,9 @@ const UserManagement = () => {
     const handleResetPassword = async (userId) => {
         if (!window.confirm("Are you sure you want to reset this user's password?")) return;
         try {
-            const response = await axios.put(`http://localhost:5000/api/users/${userId}/reset-password`);
-            alert(response.data.message); // Show success message
-            fetchUsers(); // Refresh user list
+            await axios.put(`http://localhost:5000/api/users/reset-password/${userId}`);
+            alert("Password has been reset. User must set a new password.");
+            fetchUsers();
         } catch (error) {
             console.error("Error resetting password:", error.message);
             alert("Failed to reset password. Please try again."); // Show error to user

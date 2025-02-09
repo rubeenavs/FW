@@ -11,6 +11,7 @@ import UserDashboard from "./components/UserDashboard";
 import UserManagement from "./components/UserManagement";
 import RecipeInventory from "./components/RecipeInventory";
 import RecommendedRecipes from "./components/RecommendedRecipes";
+import ChangePassword from "./components/ChangePassword";
 import Inventory from "./components/Inventory"; 
 
 
@@ -80,7 +81,6 @@ function App() {
           {/* User Protected Routes */}
           <Route path="/user-dashboard" element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />} />
           <Route path="/groceries" element={isAuthenticated ? <GroceryManager userId={user?.id} /> : <Navigate to="/login" />} />
-          <Route path="/user-dashboard/inventory" element={isAuthenticated ? <Inventory/> : <Navigate to="/login" />} />
           <Route path="/cooking" element={isAuthenticated ? <CookingManager userId={user?.id} /> : <Navigate to="/login" />} />
           <Route path="/recommended-recipes" element={isAuthenticated ? <RecommendedRecipes userId={user?.id} /> : <Navigate to="/login" />} />
 

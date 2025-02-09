@@ -51,6 +51,17 @@ router.post("/", async (req, res) => {
             return res.status(401).json({ error: "Invalid username or password" });
         }
 
+        // Check if the stored password is still the temporary password "Temp@123"
+        const isTempPassword = await bcrypt.compare("Temp@123", user.password);
+        if (isTempPassword) {
+            console.log("🚨 Temporary password detected. Forcing password change.");
+            return res.status(200).json({
+                message: "Temporary password detected. Please change your password.",
+                forceChange: true,
+                user: { id: user.userid, username: user.username, email: user.email, role: user.role }
+            });
+        }
+
         console.log("✅ Login successful");
         res.status(200).json({
             message: "Login successful",
