@@ -43,10 +43,7 @@ function GroceryManager({ userId }) {
         }
     };
 
-    
-
     const styles = {
-<<<<<<< HEAD
         pageContainer: {
             background: "linear-gradient(to bottom, #f5f5dc, #3a6b51)",
             fontFamily: "'Shadows Into Light', cursive",
@@ -67,14 +64,13 @@ function GroceryManager({ userId }) {
             position: "absolute",
             textAlign: "center",
             boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-            top:"28%",
+            top: "28%",
         },
         imageContainer: {
             marginTop: "-435px",
             display: "flex",
             flexDirection: "column", // Stack images vertically
-            alignItems: "center", // Center images horizontally
-            //gap: "20px", // Adds space between the two images
+            alignItems: "center",
         },
         coupleImage: {
             width: "103%",
@@ -102,8 +98,7 @@ function GroceryManager({ userId }) {
             boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.3)",
             maxWidth: "450px",
             textAlign: "center",
-            marginTop:"-100%",
-            
+            marginTop: "-100%",
         },
         formGroup: {
             display: "flex",
@@ -174,8 +169,8 @@ function GroceryManager({ userId }) {
                 <img src="/images/9.jpg" alt="Additional Image" style={styles.coupleImage} />
             </div>
 
-             {/* Grocery Form */}
-             <div style={styles.container}>
+            {/* Grocery Form */}
+            <div style={styles.container}>
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Grocery Name</label>
                     <input
@@ -212,76 +207,13 @@ function GroceryManager({ userId }) {
                     </select>
                 </div>
 
-                <div style={styles.formGroup}>
-                    <label style={styles.label}>Price</label>
-                    <input
-                        type="number"
-                        placeholder="Enter price"
-                        value={newGrocery.price}
-                        onChange={(e) => setNewGrocery({ ...newGrocery, price: e.target.value })}
-                        style={styles.input}
-                    />
-                </div>
-
-                <div style={styles.formGroup}>
-                    <label style={styles.label}>Purchase Date</label>
-                    <input
-                        type="date"
-                        placeholder="Select purchase date"
-                        value={newGrocery.date_of_purchase}
-                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_purchase: e.target.value })}
-                        style={styles.input}
-                    />
-                </div>
-
-                <div style={styles.formGroup}>
-                    <label style={styles.label}>Expiry Date</label>
-                    <input
-                        type="date"
-                        placeholder="Select expiry date"
-                        value={newGrocery.date_of_expiry}
-                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
-                        style={styles.input}
-                    />
-                </div>
-
-                
-
                 <button
                     style={styles.button}
                     onClick={handleAddGrocery}
                     onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                 >
-                    Add Grocery
-=======
-        container: { padding: "20px", backgroundColor: "white", borderRadius: "10px", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)", maxWidth: "600px", margin: "0 auto" },
-        title: { textAlign: "center", fontSize: "24px", fontWeight: "bold", color: "#358856", marginBottom: "20px" },
-        form: { display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" },
-        input: { padding: "8px", fontSize: "14px", border: "1px solid #ccc", borderRadius: "5px" },
-        select: { padding: "8px", fontSize: "14px", border: "1px solid #ccc", borderRadius: "5px" },
-        button: { padding: "8px 16px", fontSize: "14px", fontWeight: "bold", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", backgroundColor: "#007BFF" },
-    };
-
-    return (
-        <div style={styles.container}>
-            <h1 style={styles.title}>Grocery Manager</h1>
-
-            {/* Form to Add Grocery */}
-            <div style={styles.form}>
-                <input type="text" placeholder="Grocery Name" value={newGrocery.name} onChange={(e) => setNewGrocery({ ...newGrocery, name: e.target.value })} required style={styles.input} />
-                <input type="number" placeholder="Quantity" value={newGrocery.quantity} onChange={(e) => setNewGrocery({ ...newGrocery, quantity: e.target.value })} required style={styles.input} />
-                <select value={newGrocery.unit} onChange={(e) => setNewGrocery({ ...newGrocery, unit: e.target.value })} style={styles.select}>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="pcs">pcs</option>
-                </select>
-                <input type="number" placeholder="Price" value={newGrocery.price} onChange={(e) => setNewGrocery({ ...newGrocery, price: e.target.value })} required style={styles.input} />
-                <input type="date" placeholder="Expiry Date" value={newGrocery.date_of_expiry} onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })} style={styles.input} />
-                <input type="date" placeholder="Purchase Date" value={newGrocery.date_of_purchase} onChange={(e) => setNewGrocery({ ...newGrocery, date_of_purchase: e.target.value })} required style={styles.input} />
-                <button style={styles.button} onClick={handleAddGrocery}>
                     ➕ Add Grocery
->>>>>>> c54c5a872e43eabba6c51dfd007579f10fa6abcc
                 </button>
             </div>
         </div>
@@ -289,4 +221,3 @@ function GroceryManager({ userId }) {
 }
 
 export default GroceryManager;
-
