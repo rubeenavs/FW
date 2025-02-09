@@ -30,6 +30,13 @@ const Login = ({ onLogin }) => {
         alert(data.error || "Login failed. Please try again.");
         return;
       }
+// If the backend indicates a forced password change, redirect to Change Password page.
+if (data.forceChange) {
+  alert(data.message);
+  // Pass the user's id as a URL parameter so the ChangePassword component knows which user to update.
+  navigate(`/change-password/${data.user.id}`);
+  return;
+}
 
       alert("Login successful! Redirecting to dashboard...");
 

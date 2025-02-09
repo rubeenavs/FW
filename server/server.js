@@ -35,6 +35,10 @@ try {
     app.use("/api/users", require("./routes/userRoutes"));
     app.use("/api/cook", require("./routes/cookRoutes"));
     app.use("/api/recommendations", require("./routes/recommendationRoutes"));
+    app.use("/api/waste-summary", require("./routes/foodWasteRoutes"));
+    app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
+    
+
 
 
     console.log("✅ API routes loaded successfully!");

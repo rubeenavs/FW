@@ -13,7 +13,7 @@ import RecipeInventory from "./components/RecipeInventory";
 import RecommendedRecipes from "./components/RecommendedRecipes";
 import ChangePassword from "./components/ChangePassword";
 import Inventory from "./components/Inventory"; 
-
+import FoodWasteChart from "./components/FoodWasteChart"; 
 
 export const AuthContext = createContext();
 
@@ -81,8 +81,12 @@ function App() {
           {/* User Protected Routes */}
           <Route path="/user-dashboard" element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />} />
           <Route path="/groceries" element={isAuthenticated ? <GroceryManager userId={user?.id} /> : <Navigate to="/login" />} />
+          <Route path="/inventory" element={isAuthenticated ? <Inventory /> : <Navigate to="/login" />} />
           <Route path="/cooking" element={isAuthenticated ? <CookingManager userId={user?.id} /> : <Navigate to="/login" />} />
           <Route path="/recommended-recipes" element={isAuthenticated ? <RecommendedRecipes userId={user?.id} /> : <Navigate to="/login" />} />
+          <Route path="/food-waste-chart" element={isAuthenticated ? <FoodWasteChart userId={user?.id} /> : <Navigate to="/login" />} />
+          <Route path="/change-password/:userId" element={<ChangePassword />} />
+
 
           {/* Admin Protected Routes */}
           <Route path="/admin-dashboard/*" element={isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/user-dashboard" />} />
