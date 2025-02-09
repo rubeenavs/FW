@@ -2,9 +2,10 @@ import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Registration";
+import Home from "./components/Home"; // ✅ Import Home Component
 import GroceryManager from "./components/GroceryManager";
 import RecipeManager from "./components/RecipeManager";
-import CookingManager from "./components/CookingManager"; // Renamed from Calculator
+import CookingManager from "./components/CookingManager";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 import UserManagement from "./components/UserManagement";
@@ -35,116 +36,27 @@ function App() {
     }
   }, []);
 
-  // Save to localStorage whenever the user state changes
-  useEffect(() => {
-    try {
-      if (isAuthenticated) {
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("isAuthenticated", JSON.stringify(isAuthenticated));
-        localStorage.setItem("isAdmin", JSON.stringify(isAdmin));
-      } else {
-        localStorage.removeItem("user");
-        localStorage.removeItem("isAuthenticated");
-        localStorage.removeItem("isAdmin");
-      }
-    } catch (error) {
-      console.error("Error saving to localStorage:", error.message);
-    }
-  }, [user, isAuthenticated, isAdmin]);
-
-  const handleLogin = (role, loggedInUser, rememberMe) => {
-    setIsAuthenticated(true);
-    setIsAdmin(role === "Admin");
-    setUser(loggedInUser);
-
-    try {
-      if (rememberMe) {
-        localStorage.setItem("user", JSON.stringify(loggedInUser));
-        localStorage.setItem("isAuthenticated", JSON.stringify(true));
-        localStorage.setItem("isAdmin", JSON.stringify(role === "admin"));
-      } else {
-        sessionStorage.setItem("user", JSON.stringify(loggedInUser));
-        sessionStorage.setItem("isAuthenticated", JSON.stringify(true));
-        sessionStorage.setItem("isAdmin", JSON.stringify(role === "admin"));
-      }
-    } catch (error) {
-      console.error("Error during login state storage:", error.message);
-    }
-  };
-
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsAdmin(false);
     setUser(null);
-
-    try {
-      localStorage.clear();
-      sessionStorage.clear();
-    } catch (error) {
-      console.error("Error during logout:", error.message);
-    }
-  };
-
-  const ProtectedRoute = ({ children, requiredRole }) => {
-    if (!isAuthenticated) {
-      return <Navigate to="/login" />;
-    }
-    if (requiredRole === "Admin" && !isAdmin) {
-      return <Navigate to="/" />;
-    }
-    return children;
+    localStorage.clear();
+    sessionStorage.clear();
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        setIsAuthenticated,
-        isAdmin,
-        setIsAdmin,
-        user,
-        setUser,
-        handleLogout,
-      }}
-    >
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, isAdmin, setIsAdmin, user, setUser, handleLogout }}>
       <Router>
-        <div
-          style={{
-            padding: "10px",
-            background: "#f8f9fa",
-            borderBottom: "1px solid #ddd",
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          {isAuthenticated ? (
-            <>
-              <span>Welcome, {user?.username || "User"}!</span>
-              <button
-                onClick={handleLogout}
-                style={{
-                  cursor: "pointer",
-                  padding: "5px 10px",
-                  background: "#ff4d4d",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                }}
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <Link to="/login">Login</Link>
-          )}
-        </div>
-
         <Routes>
+          {/* ✅ Home Page as Default */}
+          <Route path="/" element={<Home />} />
+
           {/* Public Routes */}
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           {/* User Protected Routes */}
+<<<<<<< HEAD
           <Route
             path="/user-dashboard"
             element={
@@ -178,23 +90,17 @@ function App() {
             }
           />
            <Route path="/change-password/:userId" element={<ChangePassword />} />
+=======
+          
 
           {/* Admin Protected Routes */}
-          <Route
-            path="/admin-dashboard/*"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <AdminDashboard />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="recipes" element={<RecipeManager />} />
-            <Route path="manage-users" element={<UserManagement />} />
-            <Route path="inventory" element={<RecipeInventory />} />
-          </Route>
+          <Route path="/admin-dashboard/*" element={isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/user-dashboard" />} />
+          <Route path="/admin-dashboard/recipes" element={isAuthenticated && isAdmin ? <RecipeManager /> : <Navigate to="/user-dashboard" />} />
+          <Route path="/admin-dashboard/manage-users" element={isAuthenticated && isAdmin ? <UserManagement /> : <Navigate to="/user-dashboard" />} />
+          <Route path="/admin-dashboard/inventory" element={isAuthenticated && isAdmin ? <RecipeInventory /> : <Navigate to="/user-dashboard" />} />
 
-          {/* Redirect all unknown routes to login */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          {/* Redirect all unknown routes to home */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </Router>
     </AuthContext.Provider>

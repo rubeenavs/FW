@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Navbar from "./Navbar";
 
 function GroceryManager({ userId }) {
     const [newGrocery, setNewGrocery] = useState({
@@ -19,7 +20,7 @@ function GroceryManager({ userId }) {
         const { name, quantity, unit, price, date_of_expiry, date_of_purchase } = newGrocery;
 
         if (!name || !quantity || !unit || !price || !date_of_purchase) {
-            alert("⚠️ Please fill out all required fields.");
+            alert("⚠ Please fill out all required fields.");
             return;
         }
 
@@ -43,35 +44,215 @@ function GroceryManager({ userId }) {
         }
     };
 
-    
-
     const styles = {
-        container: { padding: "20px", backgroundColor: "white", borderRadius: "10px", boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)", maxWidth: "600px", margin: "0 auto" },
-        title: { textAlign: "center", fontSize: "24px", fontWeight: "bold", color: "#358856", marginBottom: "20px" },
-        form: { display: "flex", flexDirection: "column", gap: "10px", marginBottom: "20px" },
-        input: { padding: "8px", fontSize: "14px", border: "1px solid #ccc", borderRadius: "5px" },
-        select: { padding: "8px", fontSize: "14px", border: "1px solid #ccc", borderRadius: "5px" },
-        button: { padding: "8px 16px", fontSize: "14px", fontWeight: "bold", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", backgroundColor: "#007BFF" },
+        pageContainer: {
+            background: "linear-gradient(to bottom, #f5f5dc, #3a6b51)",
+            fontFamily: "'Shadows Into Light', cursive",
+            minHeight: "360vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+            position: "relative",
+        },
+        trackBox: {
+            background: "#2e856e",
+            padding: "20px 20px",
+            fontSize: "50px",
+            fontWeight: "bold",
+            color: "white",
+            position: "absolute",
+            textAlign: "center",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+            top: "28%",
+        },
+        imageContainer: {
+            marginTop: "-435px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+        },
+        coupleImage: {
+            width: "103%",
+            height: "auto",
+            borderRadius: "3px",
+            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+        },
+        title: {
+            fontFamily: "'Shadows Into Light', cursive",
+            fontSize: "40px",
+            fontWeight: "bold",
+            color: "#358856",
+            textAlign: "center",
+            marginBottom: "10px",
+            textTransform: "uppercase",
+            position: "absolute",
+            top: "0%",
+            left: "50%",
+            transform: "translateX(-50%)",
+        },
+        container: {
+            background: "#1e3a34",
+            padding: "40px",
+            borderRadius: "20px",
+            boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.3)",
+            maxWidth: "450px",
+            textAlign: "center",
+            marginTop: "-100%",
+        },
+        formGroup: {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            marginBottom: "25px",
+            width: "100%",
+        },
+        label: {
+            fontFamily: "'Shadows Into Light', cursive",
+            fontSize: "18px",
+            fontWeight: "bold",
+            marginBottom: "5px",
+            color: "#f5f5dc",
+        },
+        input: {
+            fontFamily: "'Shadows Into Light', cursive",
+            padding: "10px",
+            fontSize: "16px",
+            border: "2px solid #ccc",
+            borderRadius: "8px",
+            marginBottom: "10px",
+            width: "100%",
+            background: "#e0e0d1",
+            color: "#1e3a34",
+        },
+        select: {
+            fontFamily: "'Shadows Into Light', cursive",
+            padding: "10px",
+            fontSize: "16px",
+            border: "2px solid #ccc",
+            borderRadius: "8px",
+            marginBottom: "10px",
+            width: "100%",
+            background: "#e0e0d1",
+            color: "#1e3a34",
+        },
+        button: {
+            fontFamily: "'Shadows Into Light', cursive",
+            padding: "12px 20px",
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "white",
+            backgroundColor: "#2e856e",
+            border: "none",
+            borderRadius: "8px",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease, transform 0.2s ease",
+            width: "100%",
+        },
+        buttonHover: {
+            backgroundColor: "#1e3a34",
+            transform: "scale(1.05)",
+        },
     };
 
     return (
-        <div style={styles.container}>
+        <div style={styles.pageContainer}>
+            {/* ✅ Navbar Added */}
+            <Navbar />
+
+            {/* ✅ Green Box - TRACK YOUR GROCERIES */}
+            <div style={styles.trackBox}>START ADDING YOUR GROCERIES HERE</div>
+
+            {/* ✅ Title - Moved to Top Center */}
             <h1 style={styles.title}>Grocery Manager</h1>
 
-            {/* Form to Add Grocery */}
-            <div style={styles.form}>
-                <input type="text" placeholder="Grocery Name" value={newGrocery.name} onChange={(e) => setNewGrocery({ ...newGrocery, name: e.target.value })} required style={styles.input} />
-                <input type="number" placeholder="Quantity" value={newGrocery.quantity} onChange={(e) => setNewGrocery({ ...newGrocery, quantity: e.target.value })} required style={styles.input} />
-                <select value={newGrocery.unit} onChange={(e) => setNewGrocery({ ...newGrocery, unit: e.target.value })} style={styles.select}>
-                    <option value="kg">kg</option>
-                    <option value="g">g</option>
-                    <option value="pcs">pcs</option>
-                </select>
-                <input type="number" placeholder="Price" value={newGrocery.price} onChange={(e) => setNewGrocery({ ...newGrocery, price: e.target.value })} required style={styles.input} />
-                <input type="date" placeholder="Expiry Date" value={newGrocery.date_of_expiry} onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })} style={styles.input} />
-                <input type="date" placeholder="Purchase Date" value={newGrocery.date_of_purchase} onChange={(e) => setNewGrocery({ ...newGrocery, date_of_purchase: e.target.value })} required style={styles.input} />
-                <button style={styles.button} onClick={handleAddGrocery}>
-                    ➕ Add Grocery
+            {/* ✅ Images - One Below the Other */}
+            <div style={styles.imageContainer}>
+                <img src="/images/coupleimage.jpg" alt="Couple Cooking" style={styles.coupleImage} />
+                <img src="/images/9.jpg" alt="Additional Image" style={styles.coupleImage} />
+            </div>
+
+           {/* Grocery Form */}
+           <div style={styles.container}>
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Grocery Name</label>
+                    <input
+                        type="text"
+                        placeholder="Enter grocery name"
+                        value={newGrocery.name}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, name: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Quantity</label>
+                    <input
+                        type="number"
+                        placeholder="Enter quantity"
+                        value={newGrocery.quantity}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, quantity: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Unit</label>
+                    <select
+                        value={newGrocery.unit}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, unit: e.target.value })}
+                        style={styles.select}
+                    >
+                        <option value="kg">kg</option>
+                        <option value="g">g</option>
+                        <option value="pcs">pcs</option>
+                        <option value="L">L</option>
+                    </select>
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Price</label>
+                    <input
+                        type="number"
+                        placeholder="Enter price"
+                        value={newGrocery.price}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, price: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Purchase Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select purchase date"
+                        value={newGrocery.date_of_purchase}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_purchase: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Expiry Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select expiry date"
+                        value={newGrocery.date_of_expiry}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                
+
+                <button
+                    style={styles.button}
+                    onClick={handleAddGrocery}
+                    onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+                    onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
+                >
+                    Add Grocery
                 </button>
             </div>
         </div>
