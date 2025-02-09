@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import Navbar from "./Navbar";
 
 function GroceryManager({ userId }) {
     const [newGrocery, setNewGrocery] = useState({
@@ -19,7 +20,7 @@ function GroceryManager({ userId }) {
         const { name, quantity, unit, price, date_of_expiry, date_of_purchase } = newGrocery;
 
         if (!name || !quantity || !unit || !price || !date_of_purchase) {
-            alert("⚠️ Please fill out all required fields.");
+            alert("⚠ Please fill out all required fields.");
             return;
         }
 
@@ -69,7 +70,7 @@ function GroceryManager({ userId }) {
         imageContainer: {
             marginTop: "-435px",
             display: "flex",
-            flexDirection: "column", // Stack images vertically
+            flexDirection: "column",
             alignItems: "center",
         },
         coupleImage: {
@@ -157,20 +158,23 @@ function GroceryManager({ userId }) {
 
     return (
         <div style={styles.pageContainer}>
-            {/* Green Box - TRACK YOUR GROCERIES */}
+            {/* ✅ Navbar Added */}
+            <Navbar />
+
+            {/* ✅ Green Box - TRACK YOUR GROCERIES */}
             <div style={styles.trackBox}>START ADDING YOUR GROCERIES HERE</div>
 
-            {/* Title - Moved to Top Center */}
+            {/* ✅ Title - Moved to Top Center */}
             <h1 style={styles.title}>Grocery Manager</h1>
 
-            {/* Images - One Below the Other */}
+            {/* ✅ Images - One Below the Other */}
             <div style={styles.imageContainer}>
                 <img src="/images/coupleimage.jpg" alt="Couple Cooking" style={styles.coupleImage} />
                 <img src="/images/9.jpg" alt="Additional Image" style={styles.coupleImage} />
             </div>
 
-            {/* Grocery Form */}
-            <div style={styles.container}>
+           {/* Grocery Form */}
+           <div style={styles.container}>
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Grocery Name</label>
                     <input
@@ -207,13 +211,48 @@ function GroceryManager({ userId }) {
                     </select>
                 </div>
 
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Price</label>
+                    <input
+                        type="number"
+                        placeholder="Enter price"
+                        value={newGrocery.price}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, price: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Purchase Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select purchase date"
+                        value={newGrocery.date_of_purchase}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_purchase: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                <div style={styles.formGroup}>
+                    <label style={styles.label}>Expiry Date</label>
+                    <input
+                        type="date"
+                        placeholder="Select expiry date"
+                        value={newGrocery.date_of_expiry}
+                        onChange={(e) => setNewGrocery({ ...newGrocery, date_of_expiry: e.target.value })}
+                        style={styles.input}
+                    />
+                </div>
+
+                
+
                 <button
                     style={styles.button}
                     onClick={handleAddGrocery}
                     onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                 >
-                    ➕ Add Grocery
+                    Add Grocery
                 </button>
             </div>
         </div>
