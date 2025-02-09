@@ -10,6 +10,7 @@ import UserDashboard from "./components/UserDashboard";
 import UserManagement from "./components/UserManagement";
 import RecipeInventory from "./components/RecipeInventory";
 import RecommendedRecipes from "./components/RecommendedRecipes";
+import ChangePassword from "./components/ChangePassword";
 
 export const AuthContext = createContext();
 
@@ -176,6 +177,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+           <Route path="/change-password/:userId" element={<ChangePassword />} />
 
           {/* Admin Protected Routes */}
           <Route

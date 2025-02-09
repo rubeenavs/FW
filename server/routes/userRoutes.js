@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { getUsers } = require("../db"); // ✅ Ensure correct import
 const { supabase } = require("../db");  // ✅ Ensure Supabase is imported correctly
+const bcrypt = require("bcrypt");
 
 // ✅ Debugging Log
 console.log("✅ userRoutes.js loaded!");
@@ -88,6 +89,72 @@ router.put("/:id/role", async (req, res) => {
         return res.status(500).json({ error: "Internal server error" });
     }
 });
+
+// ✅ Reset Password Route (Admin Only)
+router.put("/reset-password/:id", async (req, res) => {
+    const { id } = req.params;
+    const newPassword = "Temp@123"; // ✅ Default temporary password
+    const hashedPassword = await bcrypt.hash(newPassword, 10); // ✅ Hash password
+
+    try {
+        // ✅ Update password directly in PostgreSQL `users` table
+        const { data, error } = await supabase
+            .from("users")
+            .update({ password: hashedPassword }) // ✅ Store hashed password
+            .eq("userid", id);
+
+        if (error) {
+            console.error("❌ Supabase Update Error:", error);
+            return res.status(500).json({ error: "Database error", details: error });
+        }
+
+        res.json({ message: `Password reset successful. Temporary password: ${newPassword}` });
+
+    } catch (error) {
+        console.error("❌ Server Error:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+// User Change to New Password
+
+router.put("/change-password/:userid", async (req, res) => {
+    const { userid } = req.params;
+    const { newPassword } = req.body; // Only new password required
+  
+    try {
+      // 1️⃣ Fetch user by userid (just to confirm they exist)
+      const { data: user, error: fetchError } = await supabase
+        .from("users")
+        .select("userid") 
+        .eq("userid", userid)
+        .single();
+  
+      if (fetchError || !user) {
+        console.error("❌ User not found or query error:", fetchError);
+        return res.status(404).json({ error: "User not found" });
+      }
+  
+      // 2️⃣ Hash the new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  
+      // 3️⃣ Update the user's password in the database
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ password: hashedPassword })
+        .eq("userid", userid);
+  
+      if (updateError) {
+        console.error("❌ Error updating password:", updateError);
+        return res.status(500).json({ error: "Failed to update password", details: updateError });
+      }
+  
+      return res.json({ message: "Password updated successfully!" });
+    } catch (error) {
+      console.error("❌ Server Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
 
 

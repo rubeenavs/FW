@@ -51,7 +51,9 @@ router.post("/", async (req, res) => {
         console.log("🛠 Inserting new user into Supabase...");
         const { data, error: insertError } = await supabase
             .from("users")
-            .insert([{ username, email, password: hashedPassword, role }]); // ✅ Role added
+            .insert([{ username, email, password: hashedPassword, role }]) // ✅ Role added
+            .select("*");  // ✅ Ensures inserted data is returned
+
 
         if (insertError) {
             console.error("❌ Supabase Insert Error:", insertError);
