@@ -72,16 +72,6 @@ const Register = () => {
             style={styles.input}
             required
           />
-          <label htmlFor="role" style={styles.label}>Role:</label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            style={styles.input}
-          >
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-          </select>
           <button
             type="submit"
             style={styles.button}

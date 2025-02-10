@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
+import { showError, showSuccess } from "./alerts";
 
 function GroceryManager({ userId }) {
     const [newGrocery, setNewGrocery] = useState({
@@ -20,7 +21,7 @@ function GroceryManager({ userId }) {
         const { name, quantity, unit, price, date_of_expiry, date_of_purchase } = newGrocery;
 
         if (!name || !quantity || !unit || !price || !date_of_purchase) {
-            alert("⚠ Please fill out all required fields.");
+            showError("⚠ Please fill out all required fields.");
             return;
         }
 
@@ -36,7 +37,7 @@ function GroceryManager({ userId }) {
 
             await axios.post(`http://localhost:5000/api/groceries/${userId}`, formattedGrocery);
 
-            alert("✅ Grocery added successfully!");
+            showSuccess("✅ Grocery added successfully!");
             setNewGrocery({ name: "", quantity: "", unit: "kg", price: "", date_of_expiry: "", date_of_purchase: "" });
         } catch (error) {
             console.error("Error adding/updating grocery:", error.message);

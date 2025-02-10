@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import logoImage from "./Logo.jpg"; // Adjust the path if needed
+import logoImage from "./Logo.jpg"; 
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -8,6 +8,8 @@ const Navbar = () => {
     const styles = {
         navbar: {
             display: "flex",
+            flexWrap: "wrap", 
+        justifyContent: "center", 
             justifyContent: "space-between",
             alignItems: "center",
             backgroundColor: "#2e856e",
@@ -36,6 +38,7 @@ const Navbar = () => {
         },
         buttonContainer: {
             display: "flex",
+            flexWrap: "wrap",
             gap: "10px",
         },
         button: {
@@ -48,6 +51,7 @@ const Navbar = () => {
             borderRadius: "5px",
             cursor: "pointer",
             transition: "background-color 0.3s ease, transform 0.2s ease",
+            minWidth: "150px",
         },
         buttonHover: {
             backgroundColor: "#144f3c",
@@ -105,6 +109,25 @@ const Navbar = () => {
                     onClick={() => navigate("/food-waste-chart")}
                 >
                     Food Waste Chart
+                </button>
+                {/* ✅ New Tab 1: Recipe Manager */}
+                <button
+                    style={styles.button}
+                    onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+                    onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
+                    onClick={() => navigate("/recipe-manager")}
+                >
+                    Recipe Manager
+                </button>
+
+                {/* ✅ New Tab 2: Recipe Library (routed to RecipeInventory) */}
+                <button
+                    style={styles.button}
+                    onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
+                    onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
+                    onClick={() => navigate("/recipe-library")}
+                >
+                    Recipe Library
                 </button>
             </div>
         </div>

@@ -2,7 +2,9 @@ import React, { useState, useEffect, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Registration";
-import Home from "./components/Home"; // ✅ Import Home Component
+import Home from "./components/Home"; 
+import TheApp from "./components/TheApp"; 
+import AboutUs from "./components/AboutUs"; 
 import GroceryManager from "./components/GroceryManager";
 import RecipeManager from "./components/RecipeManager";
 import CookingManager from "./components/CookingManager";
@@ -74,6 +76,8 @@ function App() {
         <Routes>
           {/* ✅ Home Page as Default */}
           <Route path="/" element={<Home />} />
+          <Route path="/the-app" element={<TheApp />} />  
+            <Route path="/about-us" element={<AboutUs />} /> 
  
           {/* Public Routes */}
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
@@ -87,6 +91,10 @@ function App() {
           <Route path="/recommended-recipes" element={isAuthenticated ? <RecommendedRecipes userId={user?.id} /> : <Navigate to="/login" />} />
           <Route path="/food-waste-chart" element={isAuthenticated ? <FoodWasteChart userId={user?.id} /> : <Navigate to="/login" />} />
           <Route path="/change-password/:userId" element={<ChangePassword />} />
+         
+          <Route path="/recipe-manager" element={<RecipeManager />} />
+  
+          <Route path="/recipe-library" element={<RecipeInventory />} />
  
  
           {/* Admin Protected Routes */}

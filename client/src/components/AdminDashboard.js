@@ -114,7 +114,7 @@ const AdminDashboard = () => {
                     onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
                     onClick={() => setActiveTab("inventory")}
                 >
-                    Inventory
+                    Recipe Library
                 </button>
             </nav>
 

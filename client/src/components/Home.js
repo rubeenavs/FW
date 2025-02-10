@@ -5,7 +5,15 @@ const Home = () => {
     const navigate = useNavigate();
 
     const handleLoginClick = () => {
-        navigate("/login"); // Redirects to login page
+        navigate("/login");
+    };
+
+    const handleTheAppClick = () => {
+        navigate("/the-app"); // ✅ Navigate to "The App" page
+    };
+
+    const handleAboutUsClick = () => {
+        navigate("/about-us"); // ✅ Navigate to "About Us" page
     };
 
     const styles = {
@@ -16,21 +24,17 @@ const Home = () => {
             justifyContent: "center",
             height: "100vh",
             width: "100vw",
-            overflowX: "hidden", // Prevents horizontal scrolling
             background: "url('/images/12.jpg') no-repeat center center fixed",
             backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
             fontFamily: "'Shadows Into Light', cursive",
             textAlign: "center",
             padding: "20px",
-            position: "relative",
         },
         navbar: {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             width: "100%",
-            maxWidth: "100%", // Prevents navbar from overflowing
             padding: "15px 40px",
             position: "absolute",
             top: 0,
@@ -44,13 +48,6 @@ const Home = () => {
             alignItems: "center",
             gap: "15px",
         },
-        logo: {
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%", // Makes the logo circular
-            objectFit: "cover",
-            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-        },
         navButton: {
             padding: "10px 15px",
             fontSize: "16px",
@@ -61,11 +58,6 @@ const Home = () => {
             borderRadius: "5px",
             cursor: "pointer",
             transition: "opacity 0.3s ease",
-            maxWidth: "120px", // Prevents button from stretching
-            whiteSpace: "nowrap", // Prevents text from wrapping
-        },
-        navButtonHover: {
-            opacity: "0.8",
         },
         loginButton: {
             padding: "10px 15px",
@@ -76,18 +68,15 @@ const Home = () => {
             border: "none",
             borderRadius: "5px",
             cursor: "pointer",
-            transition: "opacity 0.3s ease",
-            position:"absolute",
-            left:"85%",
-            
-            
+            position: "absolute",
+            right: "40px",
         },
         title: {
             fontSize: "48px",
             fontWeight: "bold",
             color: "#fff",
             marginBottom: "20px",
-            marginTop: "100px", // Space from navbar
+            marginTop: "100px",
             textTransform: "uppercase",
             textShadow: "2px 2px 8px rgba(0, 0, 0, 0.5)",
         },
@@ -107,28 +96,18 @@ const Home = () => {
             {/* Navbar */}
             <div style={styles.navbar}>
                 <div style={styles.logoContainer}>
-                    <img src="/images/logo.jpg" alt="Logo" style={styles.logo} />
-                    <button
-                        style={styles.navButton}
-                        onMouseOver={(e) => (e.target.style.opacity = styles.navButtonHover.opacity)}
-                        onMouseOut={(e) => (e.target.style.opacity = "1")}
-                    >
+                    <img src="/images/logo.jpg" alt="Logo" style={{ width: "80px", height: "80px", borderRadius: "50%" }} />
+                    
+                    {/* ✅ Fixed navigation buttons */}
+                    <button style={styles.navButton} onClick={handleTheAppClick}>
                         The App
                     </button>
-                    <button
-                        style={styles.navButton}
-                        onMouseOver={(e) => (e.target.style.opacity = styles.navButtonHover.opacity)}
-                        onMouseOut={(e) => (e.target.style.opacity = "1")}
-                    >
+                    <button style={styles.navButton} onClick={handleAboutUsClick}>
                         About Us
                     </button>
                 </div>
-                <button
-                    style={styles.loginButton}
-                    onClick={handleLoginClick}
-                    onMouseOver={(e) => (e.target.style.opacity = styles.navButtonHover.opacity)}
-                    onMouseOut={(e) => (e.target.style.opacity = "1")}
-                >
+
+                <button style={styles.loginButton} onClick={handleLoginClick}>
                     Login
                 </button>
             </div>
