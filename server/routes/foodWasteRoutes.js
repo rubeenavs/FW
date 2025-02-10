@@ -1,79 +1,191 @@
 const express = require("express");
 const router = express.Router();
 const { supabase } = require("../db");
+const schedule = require("node-schedule"); // ✅ For automatic scheduling
 
-// ✅ GET Waste Summary (Total Waste Cost & Expired Items Count)
-router.get("/:userId", async (req, res) => {
+// ✅ Waste Summary Route
+router.get("/waste-summary/:userId", async (req, res) => {
+    console.log(`🚀 Incoming request for /waste-summary/${req.params.userId}`);
+
     try {
         const userId = req.params.userId;
 
-        // Fetch all groceries for the user from Supabase
-        const { data: groceries, error } = await supabase
-        .from("groceries")
-        .select("*")
-        .eq("userid", userId); // ✅ Use the exact column name
-    
+        // Fetch expired grocery waste
+        const { data: expiredGroceries, error: expiredError } = await supabase
+            .from("groceries")
+            .select("price, quantity, date_of_expiry")
+            .eq("userid", userId);
 
-        if (error) {
-            console.error("❌ Supabase error:", error);
-            throw error;
+        if (expiredError) {
+            console.error("❌ Error fetching expired groceries:", expiredError);
+            return res.status(500).json({ error: expiredError.message });
         }
 
-        if (!groceries || groceries.length === 0) {
-            console.log("✅ No groceries found for user:", userId);
-            return res.json({ totalCost: 0, expiredCount: 0 });
-        }
-
-        let totalCost = 0;
-        let expiredCount = 0;
+        let expiredWaste = 0;
         const currentDate = new Date();
-
-        // Calculate total cost and count of expired items
-        groceries.forEach((item) => {
+        expiredGroceries.forEach((item) => {
             const expiryDate = new Date(item.date_of_expiry);
             if (expiryDate < currentDate) {
-                totalCost += item.quantity * item.price;
-                expiredCount++;
+                expiredWaste += item.price * item.quantity;
             }
         });
 
-        console.log("✅ Waste Summary Response:", { totalCost, expiredCount });
-        res.json({ totalCost, expiredCount });
+        // Fetch portion waste
+        const { data: portionWasteData, error: portionError } = await supabase
+            .from("calculations")
+            .select("portionwasted")
+            .eq("userid", userId);
+
+        if (portionError) {
+            console.error("❌ Error fetching portion waste:", portionError);
+            return res.status(500).json({ error: portionError.message });
+        }
+
+        let portionWaste = portionWasteData.reduce((sum, item) => sum + item.portionwasted, 0);
+
+        console.log(`✅ Waste Summary for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
+
+        res.json({ expiredWaste, portionWaste });
     } catch (error) {
         console.error("❌ Error fetching waste summary:", error.message);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// ✅ GET Upcoming Expiries
+// ✅ Upcoming Expiry Route
 router.get("/upcoming-expiries/:userId", async (req, res) => {
+    console.log(`🚀 Incoming request for /upcoming-expiries/${req.params.userId}`);
+
     try {
         const userId = req.params.userId;
-        const currentDate = new Date();
+        const currentDate = new Date().toISOString();
 
-        // Fetch upcoming expiries from Supabase
-        const { data: upcomingExpiries, error } = await supabase
-        .from("groceries")
-        .select("*")
-        .eq("userid", userId) // ✅ Corrected
-        .gte("date_of_expiry", currentDate.toISOString()) 
-        .order("date_of_expiry", { ascending: true });
-    
+        // Fetch upcoming expiry items from groceries
+        const { data, error } = await supabase
+            .from("groceries")
+            .select("name, date_of_expiry")
+            .eq("userid", userId)
+            .gte("date_of_expiry", currentDate)
+            .order("date_of_expiry", { ascending: true });
+
         if (error) {
             console.error("❌ Supabase error:", error);
-            throw error;
+            return res.status(500).json({ error: error.message });
         }
 
-        if (!upcomingExpiries || upcomingExpiries.length === 0) {
-            console.log("✅ No upcoming expiries found for user:", userId);
-            return res.json([]);
-        }
-
-        res.json(upcomingExpiries);
+        console.log(`✅ Upcoming Expiries for user ${userId}:`, data);
+        res.json(data);
     } catch (error) {
         console.error("❌ Error fetching upcoming expiries:", error.message);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: error.message });
     }
 });
 
+// ✅ Weekly Waste Route
+router.get("/weekly-waste/:userId", async (req, res) => {
+    console.log(`🚀 Incoming request for /weekly-waste/${req.params.userId}`);
+
+    try {
+        const userId = req.params.userId;
+
+        const { data, error } = await supabase
+            .from("weekly_waste")
+            .select("week, expiredwaste, portionwaste")
+            .eq("userid", userId)
+            .order("week", { ascending: true });
+
+        if (error) {
+            console.error("❌ Supabase error:", error);
+            return res.status(500).json({ error: error.message });
+        }
+
+        if (!data || data.length === 0) {
+            console.log(`⚠️ No weekly waste data found for user ${userId}`);
+            return res.status(404).json({ message: "No weekly waste data found" });
+        }
+
+        console.log(`✅ Weekly Waste for user ${userId}:`, data);
+        res.json(data);
+    } catch (error) {
+        console.error("❌ Error fetching weekly waste:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ✅ Automatically Store Weekly Waste (Runs Every Sunday at 00:00)
+const storeWeeklyWaste = async () => {
+    try {
+        console.log("🚀 Running scheduled weekly waste aggregation...");
+
+        const pastWeekDate = new Date();
+        pastWeekDate.setDate(pastWeekDate.getDate() - 7);
+
+        // Fetch expired waste
+        const { data: expiredData, error: expiredError } = await supabase
+            .from("groceries")
+            .select("userid, price, quantity, date_of_expiry")
+            .lte("date_of_expiry", new Date().toISOString())
+            .gte("date_of_expiry", pastWeekDate.toISOString());
+
+        if (expiredError) {
+            console.error("❌ Error fetching expired waste:", expiredError);
+            return;
+        }
+
+        let expiredWasteByUser = {};
+        expiredData.forEach(item => {
+            const totalCost = item.price * item.quantity;
+            expiredWasteByUser[item.userid] = (expiredWasteByUser[item.userid] || 0) + totalCost;
+        });
+
+        // Fetch portion waste
+        const { data: portionData, error: portionError } = await supabase
+            .from("calculations")
+            .select("userid, portionwasted")
+            .gte("created_at", pastWeekDate.toISOString());
+
+        if (portionError) {
+            console.error("❌ Error fetching portion waste:", portionError);
+            return;
+        }
+
+        let portionWasteByUser = {};
+        portionData.forEach(item => {
+            portionWasteByUser[item.userid] = (portionWasteByUser[item.userid] || 0) + item.portionwasted;
+        });
+
+        // Insert weekly waste summary
+        for (let userId of Object.keys(expiredWasteByUser)) {
+            const expiredWaste = expiredWasteByUser[userId] || 0;
+            const portionWaste = portionWasteByUser[userId] || 0;
+
+            const { error } = await supabase
+                .from("weekly_waste")
+                .insert([{ userid: userId, week: `Week ${new Date().getWeekNumber()}`, expiredwaste: expiredWaste, portionwaste: portionWaste }]);
+
+            if (error) {
+                console.error(`❌ Error inserting weekly waste for user ${userId}:`, error);
+            } else {
+                console.log(`✅ Weekly waste stored for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
+            }
+        }
+    } catch (error) {
+        console.error("❌ Error in weekly waste storage:", error.message);
+    }
+};
+
+// Schedule the job to run every Sunday at midnight (00:00)
+schedule.scheduleJob("0 0 * * 0", async () => {
+    console.log("⏳ Running scheduled job to store weekly waste...");
+    await storeWeeklyWaste();
+});
+
+// ✅ Export Router
 module.exports = router;
+
+// Utility function to get current week number
+Date.prototype.getWeekNumber = function () {
+    const firstDayOfYear = new Date(this.getFullYear(), 0, 1);
+    const pastDaysOfYear = (this - firstDayOfYear) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+};

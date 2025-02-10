@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logoImage from "./Logo.jpg";  // ✅ Import Logo
+import logoImage from "./Logo.jpg"; // ✅ Import Logo
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -22,7 +22,16 @@ const Login = ({ onLogin }) => {
       const responseText = await response.text();
       console.log("✅ Raw Response Text:", responseText);
 
-      const data = JSON.parse(responseText);
+      // ✅ Try parsing JSON safely
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (jsonError) {
+        console.error("❌ Error parsing JSON:", jsonError);
+        alert("Server error. Please try again.");
+        return;
+      }
+
       console.log("✅ Parsed Response Data:", data);
 
       if (!response.ok) {
@@ -30,26 +39,40 @@ const Login = ({ onLogin }) => {
         alert(data.error || "Login failed. Please try again.");
         return;
       }
-// If the backend indicates a forced password change, redirect to Change Password page.
-if (data.forceChange) {
-  alert(data.message);
-  // Pass the user's id as a URL parameter so the ChangePassword component knows which user to update.
-  navigate(`/change-password/${data.user.id}`);
-  return;
-}
+
+      // ✅ Ensure user object exists before navigating
+      if (!data.user || !data.user.role) {
+        console.error("❌ Invalid user data:", data);
+        alert("Invalid user data received. Please try again.");
+        return;
+      }
+
+      console.log("🔑 User Logged In:", data.user);
+
+      // ✅ Handle forced password change scenario
+      if (data.forceChange) {
+        alert(data.message);
+        navigate(`/change-password/${data.user.id}`);
+        return;
+      }
 
       alert("Login successful! Redirecting to dashboard...");
 
-      if (data.user.role === "Admin") {
+      // ✅ Ensure correct role-based navigation
+      if (data.user.role.toLowerCase() === "admin") {
+        console.log("🚀 Navigating to Admin Dashboard...");
         navigate("/admin-dashboard");
       } else {
+        console.log("🚀 Navigating to User Dashboard...");
         navigate("/user-dashboard");
       }
 
+      // ✅ Store user data in local storage if "Remember Me" is checked
       if (rememberMe) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
 
+      // ✅ Update authentication state
       onLogin(data.user.role, data.user, rememberMe);
     } catch (error) {
       console.error("❌ Login error:", error);
@@ -64,9 +87,9 @@ if (data.forceChange) {
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
-      background: "linear-gradient(135deg, #a9d08e, #f5f5dc)", // Green and beige gradient
+      background: "linear-gradient(135deg, #a9d08e, #f5f5dc)",
       padding: "0 20px",
-      fontFamily: "'Arial', sans-serif", // A clean sans-serif font for modern look
+      fontFamily: "'Arial', sans-serif",
     },
     logoContainer: {
       display: "flex",
@@ -93,7 +116,6 @@ if (data.forceChange) {
       top: "5%",
       left: "50%",
       transform: "translateX(-50%)",
-
     },
     container: {
       width: "400px",
@@ -144,7 +166,7 @@ if (data.forceChange) {
       transition: "opacity 0.3s ease",
     },
     buttonHover: {
-      backgroundColor: "#45a049", // Darker green on hover
+      backgroundColor: "#45a049",
     },
     actions: {
       marginTop: "20px",
@@ -170,7 +192,6 @@ if (data.forceChange) {
 
   return (
     <div style={styles.pageContainer}>
-      {/* Logo and Title */}
       <div style={styles.logoContainer}>
         <img src={logoImage} alt="Logo" style={styles.logo} />
         <div style={styles.title}>Login / Sign up </div>
@@ -179,10 +200,10 @@ if (data.forceChange) {
       <div style={styles.container}>
         <form style={styles.form} onSubmit={handleSubmit}>
           <div>
-            <label style={styles.label}>Username : </label>
+            <label style={styles.label}>Username: </label>
             <input
               type="text"
-              placeholder="Enter your username "
+              placeholder="Enter your username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={styles.input}
@@ -190,10 +211,10 @@ if (data.forceChange) {
             />
           </div>
           <div>
-            <label style={styles.label}>Password : </label>
+            <label style={styles.label}>Password: </label>
             <input
               type="password"
-              placeholder="Enter your password "
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={styles.input}

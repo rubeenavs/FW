@@ -7,64 +7,61 @@ import axios from "axios";
 const UserDashboard = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [wasteSummary, setWasteSummary] = useState({ totalCost: 0, expiredCount: 0 });
+    const [wasteSummary, setWasteSummary] = useState({ expiredWaste: 0, portionWaste: 0 });
     const [upcomingExpiries, setUpcomingExpiries] = useState([]);
     const [wasteReductionTips, setWasteReductionTips] = useState([]);
 
-    // Fetch waste summary and upcoming expiries when the component mounts or user changes
     useEffect(() => {
-        if (!user || !user.id) {
-            navigate("/login"); // Redirect to login if user is not authenticated
+        if (!user || !user.userid) {
+            navigate("/user-dashboard");
         } else {
-            fetchWasteSummary(user.id); // Fetch waste summary for the logged-in user
+            fetchWasteSummary(user.userid);
+            fetchUpcomingExpiries(user.userid);
         }
-    }, [user]); // Dependency array includes only `user`
+    }, [user]);
 
-    // Fetch waste summary from the API
+    // ✅ Fetch Waste Summary from Backend
     const fetchWasteSummary = async (userId) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/waste-summary/${userId}`);
-            console.log("🚀 Waste Summary API Response:", response.data); // ✅ Debugging log
-    
-            if (response.data && typeof response.data === "object") {
+            const response = await axios.get(`http://localhost:5000/api/food-waste/waste-summary/${userId}`);
+            console.log("📊 Waste Summary Data:", response.data);
+
+            if (response.data) {
                 setWasteSummary({
-                    totalCost: response.data.totalCost || 0,
-                    expiredCount: response.data.expiredCount || 0,
+                    expiredWaste: response.data.expiredWaste || 0,
+                    portionWaste: response.data.portionWaste || 0,
                 });
-                fetchUpcomingExpiries(userId);
-                generateWasteReductionTips(response.data);
-            } else {
-                throw new Error("Invalid response format");
+                setWasteReductionTips(generateWasteReductionTips(response.data));
             }
         } catch (error) {
             console.error("❌ Error fetching waste summary:", error);
         }
     };
-    
 
-    // Fetch upcoming expiries from the API
+    // ✅ Fetch Upcoming Expiries from Backend
     const fetchUpcomingExpiries = async (userId) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/upcoming-expiries/${userId}`);
-            console.log("📌 Upcoming Expiries API Response:", response.data); // ✅ Debugging log
-    
-            let expiredItems = response.data.filter(item => new Date(item.date_of_expiry) < new Date());
-            setUpcomingExpiries([...expiredItems, ...response.data]); // Include expired items
+            const response = await axios.get(`http://localhost:5000/api/food-waste/upcoming-expiries/${userId}`);
+            console.log("📌 Upcoming Expiries Data:", response.data);
+
+            if (response.data) {
+                setUpcomingExpiries(response.data);
+            }
         } catch (error) {
             console.error("❌ Error fetching upcoming expiries:", error);
         }
     };
-    
-    // Generate waste reduction tips based on waste summary data
-    const generateWasteReductionTips = (data = { totalCost: 0, expiredCount: 0 }) => {
+
+    // ✅ Generate Waste Reduction Tips
+    const generateWasteReductionTips = (data) => {
         let tips = [];
-        if (data.expiredCount > 5) {
-            tips.push("Consider planning meals around expiry dates to reduce waste.");
+        if (data.expiredWaste > 5) {
+            tips.push("Try organizing your fridge by expiry dates to reduce waste.");
         }
-        if (data.totalCost > 50) {
-            tips.push("Try buying in smaller quantities to avoid excess waste.");
+        if (data.portionWaste > 5) {
+            tips.push("Consider reducing portion sizes when cooking to avoid leftovers.");
         }
-        setWasteReductionTips(tips); // Set tips for rendering
+        return tips;
     };
 
     return (
@@ -73,14 +70,14 @@ const UserDashboard = () => {
             <h1>Welcome to Your Dashboard</h1>
             <p>Manage your groceries, inventory, and cooking resources here.</p>
 
-            {/* Waste Summary Section */}
+            {/* ✅ Waste Summary Section */}
             <div>
                 <h3>Waste Summary</h3>
-                <p><strong>Total Waste Cost:</strong> ${wasteSummary.totalCost.toFixed(2)}</p>
-                <p><strong>Expired Items:</strong> {wasteSummary.expiredCount}</p>
+                <p><strong>Total Expired Waste:</strong> ${wasteSummary.expiredWaste.toFixed(2)}</p>
+                <p><strong>Total Portion Waste:</strong> ${wasteSummary.portionWaste.toFixed(2)}</p>
             </div>
 
-            {/* Upcoming Expiries Section */}
+            {/* ✅ Upcoming Expiries Section */}
             <div>
                 <h3>Upcoming Expiries</h3>
                 {upcomingExpiries.length === 0 ? (
@@ -88,7 +85,7 @@ const UserDashboard = () => {
                 ) : (
                     <ul>
                         {upcomingExpiries.map((item) => (
-                            <li key={item.id}>
+                            <li key={item.name}>
                                 {item.name} - Expiry: {item.date_of_expiry}
                             </li>
                         ))}
@@ -96,7 +93,7 @@ const UserDashboard = () => {
                 )}
             </div>
 
-            {/* Waste Reduction Tips Section */}
+            {/* ✅ Waste Reduction Tips Section */}
             <div>
                 <h3>Waste Reduction Tips</h3>
                 {wasteReductionTips.length === 0 ? (

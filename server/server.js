@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const schedule = require("node-schedule"); 
 require("dotenv").config();
 const { supabase } = require("./db");
 const app = express();
@@ -29,22 +30,28 @@ app.get("/api/health", (req, res) => {
 try {
     app.use("/api/groceries", require("./routes/groceryRoutes"));
     app.use("/api/register", require("./routes/registerRoute"));
-    app.use("/api/login", require("./routes/loginRoute"));  // 🔹 FIXED!
+    app.use("/api/login", require("./routes/loginRoute"));  
     app.use("/api/admin", require("./routes/adminRoutes"));
     app.use("/api/recipes", require("./routes/recipeRoutes"));
     app.use("/api/users", require("./routes/userRoutes"));
     app.use("/api/cook", require("./routes/cookRoutes"));
     app.use("/api/recommendations", require("./routes/recommendationRoutes"));
-    app.use("/api/waste-summary", require("./routes/foodWasteRoutes"));
+    app.use("/api/food-waste", require("./routes/foodWasteRoutes"));
     app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
-    
-
-
 
     console.log("✅ API routes loaded successfully!");
 } catch (error) {
     console.error("❌ Error loading routes:", error);
 }
+
+// ✅ Import and Schedule Weekly Waste Storage
+const { storeWeeklyWaste } = require("./routes/foodWasteRoutes");
+
+// ✅ Schedule Job to Run Every Sunday at Midnight (00:00)
+schedule.scheduleJob("0 0 * * 0", async () => {
+    console.log("⏳ Running scheduled job to store weekly waste...");
+    await storeWeeklyWaste();
+});
 
 // ❌ Handle undefined routes
 app.use((req, res) => {
@@ -72,4 +79,3 @@ app._router.stack.forEach((layer) => {
     }
 });
 console.log("✅ Route check complete\n");
-
