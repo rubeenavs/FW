@@ -1,9 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import logoImage from "./Logo.jpg"; 
+import logoImage from "./Logo.jpg"; // Ensure correct path
+import LogoutButton from "../components/LogoutButton";
 
 const Navbar = () => {
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
 
     const styles = {
         navbar: {
@@ -57,23 +58,39 @@ const Navbar = () => {
             backgroundColor: "#144f3c",
             transform: "scale(1.05)",
         },
+        logoutContainer: {
+            marginLeft: "auto", // ✅ Push Logout button to the right
+        },
+        logoutButton: {
+            backgroundColor: "#d9534f",
+            fontWeight: "bold",
+            color: "white",
+            padding: "10px 15px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+            transition: "background-color 0.3s ease",
+        }
     };
 
     return (
         <div style={styles.navbar}>
+            {/* ✅ Left Side - Logo */}
             <div style={styles.logoContainer}>
                 <img src={logoImage} alt="Logo" style={styles.logo} />
                 <span style={styles.title}>SUSTAINABLE BAO</span>
             </div>
+
+            {/* ✅ Center - Navigation */}
             <div style={styles.buttonContainer}>
-                <button
+                {/* <button
                     style={styles.button}
                     onMouseOver={(e) => (e.target.style.backgroundColor = styles.buttonHover.backgroundColor)}
                     onMouseOut={(e) => (e.target.style.backgroundColor = styles.button.backgroundColor)}
                     onClick={() => navigate("/user-dashboard")}
                 >
-                    Dashboard
-                </button>
+                    
+                </button> */}
 
                 <button
                     style={styles.button}
@@ -129,6 +146,11 @@ const Navbar = () => {
                 >
                     Recipe Library
                 </button>
+            </div>
+
+            {/* ✅ Right Side - Logout Button */}
+            <div style={styles.logoutContainer}>
+                <LogoutButton />
             </div>
         </div>
     );

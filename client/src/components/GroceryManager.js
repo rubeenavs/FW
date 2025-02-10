@@ -35,6 +35,7 @@ function GroceryManager({ userId }) {
                 date_of_purchase: new Date(date_of_purchase).toISOString().split("T")[0],
             };
 
+            // ✅ FIXED: Corrected template literal syntax in axios request
             await axios.post(`http://localhost:5000/api/groceries/${userId}`, formattedGrocery);
 
             showSuccess("✅ Grocery added successfully!");
@@ -47,9 +48,11 @@ function GroceryManager({ userId }) {
 
     const styles = {
         pageContainer: {
-            background: "linear-gradient(to bottom, #f5f5dc, #3a6b51)",
+            backgroundImage: "url('/images/9.jpg')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
             fontFamily: "'Shadows Into Light', cursive",
-            minHeight: "360vh",
+            minHeight: "300vh",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -68,29 +71,17 @@ function GroceryManager({ userId }) {
             boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
             top: "28%",
         },
-        imageContainer: {
-            marginTop: "-435px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-        },
-        coupleImage: {
-            width: "103%",
-            height: "auto",
-            borderRadius: "3px",
-            boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-        },
         title: {
             fontFamily: "'Shadows Into Light', cursive",
-            fontSize: "40px",
+            fontSize: "50px",
             fontWeight: "bold",
             color: "#358856",
             textAlign: "center",
             marginBottom: "10px",
             textTransform: "uppercase",
             position: "absolute",
-            top: "0%",
-            left: "50%",
+            top: "5%",
+            left: "30%",
             transform: "translateX(-50%)",
         },
         container: {
@@ -100,7 +91,7 @@ function GroceryManager({ userId }) {
             boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.3)",
             maxWidth: "450px",
             textAlign: "center",
-            marginTop: "-100%",
+            marginTop: "20%",
         },
         formGroup: {
             display: "flex",
@@ -168,14 +159,8 @@ function GroceryManager({ userId }) {
             {/* ✅ Title - Moved to Top Center */}
             <h1 style={styles.title}>Grocery Manager</h1>
 
-            {/* ✅ Images - One Below the Other */}
-            <div style={styles.imageContainer}>
-                <img src="/images/coupleimage.jpg" alt="Couple Cooking" style={styles.coupleImage} />
-                <img src="/images/9.jpg" alt="Additional Image" style={styles.coupleImage} />
-            </div>
-
-           {/* Grocery Form */}
-           <div style={styles.container}>
+            {/* Grocery Form */}
+            <div style={styles.container}>
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Grocery Name</label>
                     <input
@@ -244,8 +229,6 @@ function GroceryManager({ userId }) {
                         style={styles.input}
                     />
                 </div>
-
-                
 
                 <button
                     style={styles.button}

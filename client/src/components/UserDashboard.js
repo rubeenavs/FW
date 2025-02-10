@@ -4,6 +4,7 @@ import { AuthContext } from "../App";
 import Navbar from "./Navbar";
 import axios from "axios";
 
+
 const UserDashboard = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
@@ -67,7 +68,7 @@ const UserDashboard = () => {
     return (
         <div style={{ paddingTop: "80px", textAlign: "center" }}>
             <Navbar />
-            <h1>Welcome to Your Dashboard</h1>
+          
             <p>Manage your groceries, inventory, and cooking resources here.</p>
 
             {/* ✅ Waste Summary Section */}

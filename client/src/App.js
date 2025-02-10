@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./components/Login";
 import Register from "./components/Registration";
 import Home from "./components/Home"; 
@@ -16,21 +16,22 @@ import RecommendedRecipes from "./components/RecommendedRecipes";
 import ChangePassword from "./components/ChangePassword";
 import Inventory from "./components/Inventory";
 import FoodWasteChart from "./components/FoodWasteChart";
- 
+import Navbar from "./components/Navbar"; // ✅ Navbar for user pages
+
 export const AuthContext = createContext();
- 
-function App() {
+
+function AppContent() { 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
-  
+  const location = useLocation(); // ✅ Now inside Router context
 
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("user");
       const savedAuth = localStorage.getItem("isAuthenticated");
       const savedAdmin = localStorage.getItem("isAdmin");
- 
+
       if (savedUser && savedAuth) {
         setUser(JSON.parse(savedUser));
         setIsAuthenticated(JSON.parse(savedAuth));
@@ -40,13 +41,13 @@ function App() {
       console.error("Error initializing state from localStorage:", error.message);
     }
   }, []);
- 
+
   const handleLogin = (role, loggedInUser, rememberMe) => {
     const isUserAdmin = role.toLowerCase() === "admin";
     setIsAuthenticated(true);
     setIsAdmin(isUserAdmin);
     setUser(loggedInUser);
- 
+
     try {
       if (rememberMe) {
         localStorage.setItem("user", JSON.stringify(loggedInUser));
@@ -61,7 +62,7 @@ function App() {
       console.error("Error during login state storage:", error.message);
     }
   };
- 
+
   const handleLogout = () => {
     setIsAuthenticated(false);
     setIsAdmin(false);
@@ -69,7 +70,10 @@ function App() {
     localStorage.clear();
     sessionStorage.clear();
   };
- 
+
+  // ✅ Hide Navbar on login, register, and admin pages
+  const showNavbar = !["/login", "/register", "/admin-dashboard"].includes(location.pathname);
+
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, isAdmin, setIsAdmin, user, setUser, handleLogout }}>
       <Router>
@@ -114,6 +118,13 @@ function App() {
     </AuthContext.Provider>
   );
 }
- 
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
+  );
+}
+
 export default App;
- 

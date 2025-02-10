@@ -140,9 +140,10 @@ const storeWeeklyWaste = async () => {
 
         // Fetch portion waste
         const { data: portionData, error: portionError } = await supabase
-            .from("calculations")
-            .select("userid, portionwasted")
-            .gte("created_at", pastWeekDate.toISOString());
+        .from("calculations")
+        .select("userid, portionwasted, calculatedat") 
+        .gte("calculatedat", pastWeekDate.toISOString()); 
+    
 
         if (portionError) {
             console.error("❌ Error fetching portion waste:", portionError);
@@ -160,14 +161,21 @@ const storeWeeklyWaste = async () => {
             const portionWaste = portionWasteByUser[userId] || 0;
 
             const { error } = await supabase
-                .from("weekly_waste")
-                .insert([{ userid: userId, week: `Week ${new Date().getWeekNumber()}`, expiredwaste: expiredWaste, portionwaste: portionWaste }]);
-
-            if (error) {
-                console.error(`❌ Error inserting weekly waste for user ${userId}:`, error);
-            } else {
-                console.log(`✅ Weekly waste stored for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
-            }
+            .from("weekly_waste")
+            .upsert([{ 
+                userid: userId, 
+                week: weekString, 
+                expiredwaste: expiredWaste, 
+                portionwaste: portionWaste 
+            }], { onConflict: ['userid', 'week'] }); 
+        
+        
+        if (error) {
+            console.error(`❌ Error inserting weekly waste for user ${userId}:`, error);
+        } else {
+            console.log(`✅ Weekly waste stored for user ${userId}: Expired = ${expiredWaste}, Portion = ${portionWaste}`);
+        }
+        
         }
     } catch (error) {
         console.error("❌ Error in weekly waste storage:", error.message);
@@ -180,12 +188,28 @@ schedule.scheduleJob("0 0 * * 0", async () => {
     await storeWeeklyWaste();
 });
 
-// ✅ Export Router
-module.exports = router;
+// ✅ Test Route: Manually Trigger Weekly Waste Storage
+router.get("/test-store-weekly", async (req, res) => {
+    try {
+        console.log("🚀 Manually triggering weekly waste storage...");
+        await storeWeeklyWaste();
+        res.json({ message: "✅ Test weekly waste stored successfully!" });
+    } catch (error) {
+        console.error("❌ Error running storeWeeklyWaste:", error.message);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+module.exports = router; 
+
+
 
 // Utility function to get current week number
-Date.prototype.getWeekNumber = function () {
-    const firstDayOfYear = new Date(this.getFullYear(), 0, 1);
-    const pastDaysOfYear = (this - firstDayOfYear) / 86400000;
-    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+const getCurrentWeek = (date) => {
+    const startOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDays = (date - startOfYear) / 86400000;
+    return Math.ceil((pastDays + startOfYear.getDay() + 1) / 7);
 };
+

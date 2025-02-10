@@ -38,6 +38,8 @@ try {
     app.use("/api/recommendations", require("./routes/recommendationRoutes"));
     app.use("/api/food-waste", require("./routes/foodWasteRoutes"));
     app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
+    
+
 
     console.log("✅ API routes loaded successfully!");
 } catch (error) {
