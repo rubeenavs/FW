@@ -1,11 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../App";
 import RecipeManager from "./RecipeManager";
 import UserManagement from "./UserManagement";
-import logoImage from "./Logo.jpg"; 
+import logoImage from "./Logo.jpg";
 import RecipeInventory from "./RecipeInventory";
+import LogoutButton from "./LogoutButton";
 
 const AdminDashboard = () => {
-    const [activeTab, setActiveTab] = useState("recipes");  // Fix: Added state for active tab
+    const [activeTab, setActiveTab] = useState("recipes");
+    const { handleLogout } = useContext(AuthContext);
+    const navigate = useNavigate();
 
     // Function to render different components based on active tab
     const renderContent = () => {
@@ -89,6 +94,7 @@ const AdminDashboard = () => {
                     <img src={logoImage} alt="Logo" style={styles.logo} />
                     <h1 style={styles.title}>Sustainable Bao</h1>
                 </div>
+                <LogoutButton />
             </div>
 
             <nav style={styles.nav}>
