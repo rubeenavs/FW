@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { showError, showSuccess } from "./alerts";
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -12,7 +13,7 @@ const Register = () => {
     e.preventDefault(); // Prevent form submission
 
     if (!username || !password || !email || !role) {
-      alert("All fields are required!");
+      showError("All fields are required!");
       return;
     }
 
@@ -28,11 +29,11 @@ const Register = () => {
         throw new Error(`Server responded with ${response.status}: ${errorText}`);
       }
 
-      alert("User registered successfully! Redirecting to login...");
+      showSuccess("User registered successfully! Redirecting to login...");
       navigate("/login"); // Redirect to login page after successful registration
     } catch (error) {
       console.error("Error during registration:", error);
-      alert(`Error during registration: ${error.message}`);
+      showError(`Error during registration: ${error.message}`);
     }
   };
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { showConfirm, showError, showSuccess } from "./alerts";
 
 const UserManagement = () => {
     const [users, setUsers] = useState([]);
@@ -15,48 +16,52 @@ const UserManagement = () => {
             setUsers(response.data);
         } catch (error) {
             console.error("Error fetching users:", error.message);
-            alert("Failed to fetch users. Please try again."); // Show error to user
+            showError("Failed to fetch users. Please try again."); // Show error to user
         }
     };
 
     // Delete a user
     const handleDeleteUser = async (userId) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
+        const confirmed = await showConfirm("Are you sure you want to delete this user?"); // ✅ Declare confirmed
+        if (!confirmed) return; // ✅ Stop execution if user cancels
+      
         try {
             const response = await axios.delete(`http://localhost:5000/api/users/${userId}`);
-            alert(response.data.message); // Show success message
+            showSuccess(response.data.message); // Show success message
             fetchUsers(); // Refresh user list
         } catch (error) {
             console.error("Error deleting user:", error.message);
-            alert("Failed to delete user. Please try again."); // Show error to user
+            showError("Failed to delete user. Please try again."); // Show error to user
         }
     };
 
     // Change user role (Promote/Demote)
     const handleChangeRole = async (userId, newRole) => {
-        if (!window.confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+        const confirmed = await showConfirm("Are you sure you want to change the role of this user?"); // ✅ Declare confirmed
+        if (!confirmed) return; // ✅ Stop execution if user cancels
         try {
             const response = await axios.put(`http://localhost:5000/api/users/${userId}/role`, {
                 role: newRole,
             });
-            alert(response.data.message); // Show success message
+            showSuccess(response.data.message); // Show success message
             fetchUsers(); // Refresh user list
         } catch (error) {
             console.error("Error updating role:", error.message);
-            alert("Failed to update user role. Please try again."); // Show error to user
+            showError("Failed to update user role. Please try again."); // Show error to user
         }
     };
 
     // Reset user password
     const handleResetPassword = async (userId) => {
-        if (!window.confirm("Are you sure you want to reset this user's password?")) return;
+        const confirmed = await showConfirm("Are you sure you want to reset password for this user?"); // ✅ Declare confirmed
+        if (!confirmed) return; // ✅ Stop execution if user cancels
         try {
             await axios.put(`http://localhost:5000/api/users/reset-password/${userId}`);
-            alert("Password has been reset. User must set a new password.");
+            showSuccess("Password has been reset. User must set a new password.");
             fetchUsers();
         } catch (error) {
             console.error("Error resetting password:", error.message);
-            alert("Failed to reset password. Please try again."); // Show error to user
+            showError("Failed to reset password. Please try again."); // Show error to user
         }
     };
 

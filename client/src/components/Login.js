@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import logoImage from "./Logo.jpg"; // ✅ Import Logo
+import logoImage from "./Logo.jpg";  // ✅ Import Logo
+import { showError, showSuccess } from "./alerts";
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
@@ -36,14 +37,14 @@ const Login = ({ onLogin }) => {
 
       if (!response.ok) {
         console.log("❌ Login failed:", data.error || "Unknown error");
-        alert(data.error || "Login failed. Please try again.");
+        showError(  "Login failed. Please try again.");
         return;
       }
 
       // ✅ Ensure user object exists before navigating
       if (!data.user || !data.user.role) {
         console.error("❌ Invalid user data:", data);
-        alert("Invalid user data received. Please try again.");
+        showError("Invalid user data received. Please try again.");
         return;
       }
 
@@ -56,18 +57,16 @@ const Login = ({ onLogin }) => {
         return;
       }
 
-      alert("Login successful! Redirecting to dashboard...");
+      showSuccess("Login successful! Redirecting to dashboard...");
 
-      // ✅ Ensure correct role-based navigation
-      if (data.user.role.toLowerCase() === "admin") {
-        console.log("🚀 Navigating to Admin Dashboard...");
-        navigate("/admin-dashboard");
-      } else {
-        console.log("🚀 Navigating to User Dashboard...");
-        navigate("/user-dashboard");
-      }
-
-      // ✅ Store user data in local storage if "Remember Me" is checked
+      // ✅ Navigate FIRST before calling onLogin
+    if (data.user.role.toLowerCase() === "admin") {
+      console.log("✅ Navigating to Admin Dashboard");
+      navigate("/admin-dashboard");
+    } else {
+      console.log("✅ Navigating to User Dashboard");
+      navigate("/user-dashboard");
+    }
       if (rememberMe) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
@@ -76,7 +75,7 @@ const Login = ({ onLogin }) => {
       onLogin(data.user.role, data.user, rememberMe);
     } catch (error) {
       console.error("❌ Login error:", error);
-      alert("An error occurred while logging in. Please try again later.");
+      showError("An error occurred while logging in. Please try again later.");
     }
   };
 

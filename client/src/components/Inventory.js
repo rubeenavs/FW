@@ -4,6 +4,7 @@ import { toast } from "react-toastify";
 import Navbar from "./Navbar";
 import { AuthContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import { showError } from "./alerts";
 
 const Inventory = () => {
     const { user } = useContext(AuthContext);

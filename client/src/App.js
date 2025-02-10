@@ -21,7 +21,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [user, setUser] = useState(null);
- 
+  
+
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -89,7 +90,7 @@ function App() {
  
  
           {/* Admin Protected Routes */}
-          <Route path="/admin-dashboard/*" element={isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/user-dashboard" />} />
+          <Route path="/admin-dashboard/*" element={isAuthenticated === null ? <Home /> : isAuthenticated && isAdmin ? <AdminDashboard /> :<Navigate to="/admin-dashboard" />} />
           <Route path="/admin-dashboard/recipes" element={isAuthenticated && isAdmin ? <RecipeManager /> : <Navigate to="/user-dashboard" />} />
           <Route
   path="/admin-dashboard/manage-users"

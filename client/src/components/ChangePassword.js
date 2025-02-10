@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { showError, showSuccess } from "./alerts";
 
 const ChangePassword = () => {
   const { userId } = useParams(); // Expecting a route like "/change-password/:userId"
@@ -22,16 +23,16 @@ const ChangePassword = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || "Failed to change password. Please try again.");
+        showError("Failed to change password. Please try again.");
         return;
       }
 
-      alert(data.message || "Password changed successfully! Please log in again.");
+      showSuccess( "Password changed successfully! Please log in again.");
       // After changing the password, redirect back to the login page.
       navigate("/login");
     } catch (error) {
       console.error("❌ Error changing password:", error);
-      alert("An error occurred while changing the password.");
+      showError("An error occurred while changing the password.");
     }
   };
 
