@@ -52,7 +52,7 @@ router.post("/:userid", validateUserId, async (req, res) => {
 });
 
 // ✅ DELETE Grocery
-router.delete("/:userid/:groceryid", validateUserId, async (req, res) => {
+router.delete("/:39/:groceryid", validateUserId, async (req, res) => {
     const { userid, groceryid } = req.params;
 
     try {

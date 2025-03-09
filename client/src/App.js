@@ -16,7 +16,7 @@ import RecommendedRecipes from "./components/RecommendedRecipes";
 import ChangePassword from "./components/ChangePassword";
 import Inventory from "./components/Inventory";
 import FoodWasteChart from "./components/FoodWasteChart";
-import Navbar from "./components/Navbar"; // ✅ Navbar for user pages
+import Navbar from "./components/Navbar"; 
 
 export const AuthContext = createContext();
 
@@ -72,56 +72,49 @@ function AppContent() {
   };
 
   // ✅ Hide Navbar on login, register, and admin pages
-  const showNavbar = !["/login", "/register", "/admin-dashboard"].includes(location.pathname);
+  const showNavbar = location.pathname === "/user-dashboard"; // ✅ Only show on User Dashboard
+
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, isAdmin, setIsAdmin, user, setUser, handleLogout }}>
-      <Router>
-        <Routes>
-          {/* ✅ Home Page as Default */}
-          <Route path="/" element={<Home />} />
-          <Route path="/the-app" element={<TheApp />} />  
-            <Route path="/about-us" element={<AboutUs />} /> 
- 
-          {/* Public Routes */}
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          <Route path="/register" element={<Register />} />
- 
-          {/* User Protected Routes */}
-          <Route path="/user-dashboard" element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />} />
-          <Route path="/groceries" element={isAuthenticated ? <GroceryManager userId={user?.id} /> : <Navigate to="/login" />} />
-          <Route path="/inventory" element={isAuthenticated ? <Inventory /> : <Navigate to="/login" />} />
-          <Route path="/cooking" element={isAuthenticated ? <CookingManager userId={user?.id} /> : <Navigate to="/login" />} />
-          <Route path="/recommended-recipes" element={isAuthenticated ? <RecommendedRecipes userId={user?.id} /> : <Navigate to="/login" />} />
-          <Route path="/food-waste-chart" element={isAuthenticated ? <FoodWasteChart userId={user?.id} /> : <Navigate to="/login" />} />
-          <Route path="/change-password/:userId" element={<ChangePassword />} />
-         
-          <Route path="/recipe-manager" element={<RecipeManager />} />
-  
-          <Route path="/recipe-library" element={<RecipeInventory />} />
- 
- 
-          {/* Admin Protected Routes */}
-          <Route path="/admin-dashboard/*" element={isAuthenticated === null ? <Home /> : isAuthenticated && isAdmin ? <AdminDashboard /> :<Navigate to="/admin-dashboard" />} />
-          <Route path="/admin-dashboard/recipes" element={isAuthenticated && isAdmin ? <RecipeManager /> : <Navigate to="/user-dashboard" />} />
-          <Route
-  path="/admin-dashboard/manage-users"
-  element={isAuthenticated && isAdmin ? <UserManagement /> : <Navigate to="/user-dashboard" replace />}
-/>
- 
-          <Route path="/admin-dashboard/inventory" element={isAuthenticated && isAdmin ? <RecipeInventory /> : <Navigate to="/user-dashboard" />} />
- 
-          {/* Redirect all unknown routes to home */}
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-      </Router>
+      {showNavbar && <Navbar />}  {/* ✅ Navbar conditionally displayed */}
+      <Routes>
+        {/* ✅ Home Page as Default */}
+        <Route path="/" element={<Home />} />
+        <Route path="/the-app" element={<TheApp />} />  
+        <Route path="/about-us" element={<AboutUs />} /> 
+
+        {/* Public Routes */}
+        <Route path="/login" element={<Login onLogin={handleLogin} />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* User Protected Routes */}
+        <Route path="/user-dashboard" element={isAuthenticated ? <UserDashboard /> : <Navigate to="/login" />} />
+        <Route path="/groceries" element={isAuthenticated ? <GroceryManager userId={user?.id} /> : <Navigate to="/login" />} />
+        <Route path="/inventory" element={isAuthenticated ? <Inventory /> : <Navigate to="/login" />} />
+        <Route path="/cooking" element={isAuthenticated ? <CookingManager userId={user?.id} /> : <Navigate to="/login" />} />
+        <Route path="/recommended-recipes" element={isAuthenticated ? <RecommendedRecipes userId={user?.id} /> : <Navigate to="/login" />} />
+        <Route path="/food-waste-chart" element={isAuthenticated ? <FoodWasteChart userId={user?.id} /> : <Navigate to="/login" />} />
+        <Route path="/change-password/:userId" element={<ChangePassword />} />
+        <Route path="/recipe-manager" element={<RecipeManager />} />
+        <Route path="/recipe-library" element={<RecipeInventory />} />
+
+        {/* Admin Protected Routes */}
+        <Route path="/admin-dashboard/*" element={isAuthenticated === null ? <Home /> : isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/admin-dashboard" />} />
+        <Route path="/admin-dashboard/recipes" element={isAuthenticated && isAdmin ? <RecipeManager /> : <Navigate to="/user-dashboard" />} />
+        <Route path="/admin-dashboard/manage-users" element={isAuthenticated && isAdmin ? <UserManagement /> : <Navigate to="/user-dashboard" replace />} />
+        <Route path="/admin-dashboard/inventory" element={isAuthenticated && isAdmin ? <RecipeInventory /> : <Navigate to="/user-dashboard" />} />
+
+        {/* Redirect all unknown routes to home */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
     </AuthContext.Provider>
   );
 }
 
 function App() {
   return (
-    <Router>
+    <Router> {/* ✅ FIXED: Only one Router wrapping the App */}
       <AppContent />
     </Router>
   );

@@ -92,7 +92,7 @@ const AdminDashboard = () => {
             <div style={styles.header}>
                 <div style={styles.logoContainer}>
                     <img src={logoImage} alt="Logo" style={styles.logo} />
-                    <h1 style={styles.title}>Sustainable Bao</h1>
+                    <h1 style={styles.title}>GroShelf</h1>
                 </div>
                 <LogoutButton />
             </div>

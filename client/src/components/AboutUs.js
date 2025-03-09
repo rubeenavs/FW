@@ -67,7 +67,7 @@ const AboutUs = () => {
                 <div style={styles.textContainer}>
                     <h3 style={styles.title}>OUR HISTORY</h3>
                     <p style={styles.text}>
-                        Sustainable Bao was founded to help people reduce food waste and track their impact.
+                        GroShelf was founded to help people reduce food waste and track their impact.
                     </p>
                 </div>
             </div>

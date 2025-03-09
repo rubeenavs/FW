@@ -63,7 +63,7 @@ const Inventory = () => {
         let cost = 0;
         data.forEach(item => {
             if (new Date(item.date_of_expiry) < new Date()) {
-                cost += item.quantity * item.price;
+                cost += item.price;
             }
         });
         setTotalWasteCost(cost);
@@ -87,11 +87,27 @@ const Inventory = () => {
 
     // ✅ FIXED: Correct String Interpolation for Delete Grocery API Call
     const handleDeleteGrocery = async (groceryId) => {
+        console.log("Delete button clicked. Grocery ID:", groceryId);
+        console.log("User ID:", user.id);
         try {
-            await axios.delete(`http://localhost:5000/api/groceries/${user.id}/${groceryId}`); // ✅ FIXED
-            fetchGroceries(user.id);
+            await axios.delete(`http://localhost:5000/api/groceries/${user.id}/${groceryId}`);
+        
+        // Update the state by filtering out the deleted item
+        setGroceries(prevGroceries => {
+            const updatedGroceries = prevGroceries.filter(item => item.groceryid !== groceryId);
+            filterExpiredItems(updatedGroceries);
+            calculateWasteSummary(updatedGroceries);
+            calculateWasteCost(updatedGroceries);
+            generateWasteReductionTips(updatedGroceries);
+            return updatedGroceries;
+        });
+
+        setExpiredGroceries(prevExpired => prevExpired.filter(item => item.groceryid !== groceryId));
+
+        console.log(`✅ Deleted grocery ID: ${groceryId}`);
         } catch (error) {
             console.error("❌ Error deleting grocery:", error.message);
+            alert("Failed to delete the grocery item. Please try again.");
         }
     };
 
@@ -115,7 +131,7 @@ const Inventory = () => {
             <Navbar />
             <div style={{ width: '100%', maxWidth: '900px', marginTop: '100px' }}>
                 <h1 style={{ textAlign: 'center', fontSize: "60px", fontFamily: "'Shadows Into Light', cursive", fontWeight: 'bold' }}>Inventory</h1>
-                <p>Total Waste Cost: ${totalWasteCost.toFixed(2)}</p>
+                <p>Total Waste Cost: ₹{totalWasteCost.toFixed(2)}</p>
                 {sortedGroceries.length === 0 ? (
                     <p>No groceries found.</p>
                 ) : (
@@ -143,7 +159,7 @@ const Inventory = () => {
                                         <td>{formattedPurchaseDate}</td>
                                         <td>{capitalizeFirstLetter(grocery.name)}</td>
                                         <td>{grocery.quantity} {grocery.unit}</td>
-                                        <td>${grocery.price.toFixed(2)}</td>
+                                        <td>₹{grocery.price.toFixed(2)}</td>
                                         <td>{formattedExpiryDate}</td>
                                         <td style={{ backgroundColor: isExpired ? "#f8d7da" : daysToExpiry >= 8 ? "#d4edda" : daysToExpiry >= 4 ? "#fff3cd" : "#ffeeba", textAlign: 'center' }}>
                                             {isExpired ? 'Expired' : daysToExpiry >= 8 ? 'Low Risk' : daysToExpiry >= 4 ? 'Medium Risk' : 'High Risk'}
@@ -157,10 +173,49 @@ const Inventory = () => {
                             })}
                         </tbody>
                     </table>
-                )}
+                )}{/* Right Side for Expired Products, Risk Summary, Waste Reduction Tips */}
+                <div style={{ display: 'flex', flexDirection: 'row', gap: '20px', width: '100%', marginTop: '30px' }}>
+                    <div style={{ flex: 1, backgroundColor: '#e7f9e7', padding: '20px', borderRadius: '10px' }}>
+                        <h3>Expired Products</h3>
+                        {expiredGroceries.length === 0 ? (
+                            <p>No expired products.</p>
+                        ) : (
+                            <ul>
+                                {expiredGroceries.map(item => (
+                                    <li key={item.groceryid}>
+                                        {capitalizeFirstLetter(item.name)} (Expired on {formatDate(item.date_of_expiry)})
+                                        <button onClick={() => handleDeleteGrocery(item.groceryid)} style={{ padding: '8px 16px', margin: '5px', cursor: 'pointer', border: 'none', backgroundColor: '#ff4d4d', color: 'white' }}>Delete</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+    
+                    <div style={{ flex: 1, backgroundColor: '#e7f9e7', padding: '20px', borderRadius: '10px' }}>
+                        <h3>Risk Summary</h3>
+                        <p>Low Risk: {wasteSummary.low}</p>
+                        <p>Medium Risk: {wasteSummary.medium}</p>
+                        <p>High Risk: {wasteSummary.high}</p>
+                        <p>Expired: {wasteSummary.expired}</p>
+                    </div>
+    
+                    <div style={{ flex: 1, backgroundColor: '#e7f9e7', padding: '20px', borderRadius: '10px' }}>
+                        <h3>Waste Reduction Tips</h3>
+                        <ul>
+                            {wasteReductionTips.length === 0 ? (
+                                <p>No tips available.</p>
+                            ) : (
+                                wasteReductionTips.map((tip, index) => <li key={index}>{tip}</li>)
+                            )}
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </div>
-    );
-};
+            </div>
+
+        );
+    };
+    
+
 
 export default Inventory;

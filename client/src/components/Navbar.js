@@ -78,7 +78,7 @@ const Navbar = () => {
             {/* ✅ Left Side - Logo */}
             <div style={styles.logoContainer}>
                 <img src={logoImage} alt="Logo" style={styles.logo} />
-                <span style={styles.title}>SUSTAINABLE BAO</span>
+                <span style={styles.title}>GROSHELF</span>
             </div>
 
             {/* ✅ Center - Navigation */}
