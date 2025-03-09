@@ -4,7 +4,6 @@ const schedule = require("node-schedule");
 require("dotenv").config();
 const { supabase } = require("./db");
 const app = express();
-
 app.delete("/api/groceries/:userId/:groceryId", async (req, res) => {
     const { userId, groceryId } = req.params;
     console.log(`🔄 Received DELETE request for user: ${userId}, grocery: ${groceryId}`);
@@ -54,6 +53,7 @@ app.get("/api/health", (req, res) => {
 try {
     app.use("/api/groceries", require("./routes/groceryRoutes"));
     app.use("/api/register", require("./routes/registerRoute"));
+    console.log("🔍 Register Route Loaded!");
     app.use("/api/login", require("./routes/loginRoute"));  
     app.use("/api/admin", require("./routes/adminRoutes"));
     app.use("/api/recipes", require("./routes/recipeRoutes"));
@@ -62,10 +62,8 @@ try {
     app.use("/api/recommendations", require("./routes/recommendationRoutes"));
     app.use("/api/food-waste", require("./routes/foodWasteRoutes"));
     app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
-    
+    app.use("/api/ocr", require("./routes/groceryOCRRoutes"));
 
-
-    console.log("✅ API routes loaded successfully!");
 } catch (error) {
     console.error("❌ Error loading routes:", error);
 }
