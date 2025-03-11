@@ -28,9 +28,7 @@ router.get("/:userid", validateUserId, async (req, res) => {
     try {
         const { userid } = req.params;
         const { data, error } = await supabase.from("groceries").select("*").eq("userid", userid);
-
         if (error) return res.status(500).json({ error: "Database error" });
-
         res.status(200).json(data);
     } catch (error) {
         res.status(500).json({ error: "Server error" });
@@ -52,15 +50,22 @@ router.post("/:userid", validateUserId, async (req, res) => {
 });
 
 // ✅ DELETE Grocery
-router.delete("/:39/:groceryid", validateUserId, async (req, res) => {
+router.delete("/:userid/:groceryid", validateUserId, async (req, res) => {
     const { userid, groceryid } = req.params;
+    const { data, error } = await supabase
+    .from("groceries")
+    .delete()
+    .eq("groceryid", groceryid)
+    .eq("userid", userid)
+    .select(); // Returns the deleted row if successful
 
-    try {
-        await supabase.from("groceries").delete().eq("id", groceryid).eq("userid", userid);
-        res.status(200).json({ message: "✅ Grocery deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ error: "Server error" });
-    }
+if (error) {
+    console.error("❌ Supabase Delete Error:", error);
+    return res.status(500).json({ error: "Failed to delete grocery item" });
+}
+
+console.log("✅ Deleted Data:", data);
+res.status(200).json({ message: "✅ Grocery deleted successfully" });
 });
 
 // ✅ PUT: Update a grocery item by userId & groceryId

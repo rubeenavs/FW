@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import { showError, showSuccess } from "./alerts";
+import UploadBill from "./UploadBill";
 
 function GroceryManager({ userId }) {
     const [newGrocery, setNewGrocery] = useState({
@@ -158,9 +159,12 @@ function GroceryManager({ userId }) {
 
             {/* ✅ Title - Moved to Top Center */}
             <h1 style={styles.title}>Grocery Manager</h1>
-
+            
             {/* Grocery Form */}
             <div style={styles.container}>
+            <div style={styles.formGroup}>          
+                  <UploadBill  userId={userId}/>
+            </div>
                 <div style={styles.formGroup}>
                     <label style={styles.label}>Grocery Name</label>
                     <input
