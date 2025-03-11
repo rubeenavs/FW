@@ -4,29 +4,7 @@ const schedule = require("node-schedule");
 require("dotenv").config();
 const { supabase } = require("./db");
 const app = express();
-app.delete("/api/groceries/:userId/:groceryId", async (req, res) => {
-    const { userId, groceryId } = req.params;
-    console.log(`🔄 Received DELETE request for user: ${userId}, grocery: ${groceryId}`);
 
-    try {
-        const { error } = await supabase
-            .from("groceries")
-            .delete()
-            .eq("user_id", userId)
-            .eq("id", groceryId);
-
-        if (error) {
-            console.error("❌ Error deleting grocery:", error.message);
-            return res.status(500).json({ success: false, error: error.message });
-        }
-
-        console.log(`🗑️ Grocery with ID ${groceryId} deleted successfully.`);
-        res.json({ success: true, message: "Grocery deleted successfully." });
-    } catch (error) {
-        console.error("❌ Error deleting grocery:", error.message);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
 
 // ✅ Middleware - CORS Configuration
 app.use(cors({
