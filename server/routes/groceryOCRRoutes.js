@@ -5,8 +5,7 @@ const fs = require("fs");
 const { supabase } = require("../db");
 const Joi = require("joi");
 const router = express.Router();
-
-
+const { GroceryCategory } = require("../enum/enums");
 
 // Multer storage for uploaded images
 const storage = multer.diskStorage({
@@ -66,7 +65,7 @@ const grocerySchema = Joi.object({
                 unit: item.unit || "pcs", // Default to "pcs" if unit is not available
                 price: item.price,
                 date_of_purchase: dateOfPurchase, // Assign today's date
-                date_of_expiry: null, // Expiry is optional
+                date_of_expiry: item.expiryDate // Expiry is optional
             });
         
             if (error) {
@@ -151,7 +150,7 @@ function parseGroceryText(text) {
 
 // Function to process an individual item
 function processItem(itemText, groceries) {
-    const itemRegex = /^(\d+\.)\s+([\w\s\/-]+)\s+(\d+\.\d{2})\s+(?:\d+\.\d{2}%\s+)?(\d+\.\d{2})\s+(\d+\.\d{2})$/;
+   // const itemRegex = /^(\d+\.)\s+([\w\s\/-]+)\s+(\d+\.\d{2})\s+(?:\d+\.\d{2}%\s+)?(\d+\.\d{2})\s+(\d+\.\d{2})$/;
     const regex = /^\d+\./;
    // const match = itemText.match(itemRegex);
     const matchSplit = itemText.trim().split(" ");
@@ -173,14 +172,25 @@ function processItem(itemText, groceries) {
          }
          name = name.concat(temp);
          const quantity = parseFloat(matchSplit[matchLength - 2]);
-         console.log(' price : ' + matchSplit[matchLength - 1]);
          const price = parseFloat(matchSplit[matchLength - 1]);
-        console.log(' name : ' + name );
+         const currentDate = new Date();
+         currentDate.setDate(currentDate.getDate() + findEnumInText(itemText));
+         const expiryDate = currentDate.toISOString().split("T")[0];
+         console.log(' name : ' + name );
     
-         groceries.push({name, quantity, price});
+         groceries.push({name, quantity, price, expiryDate});
     } else {
         console.log("No match:", itemText); // Debugging
     }
+}
+function findEnumInText(text) {
+    const upperText = text.toUpperCase();
+    for (const key in GroceryCategory) {
+        if (upperText.includes(key)) {
+            return GroceryCategory[key]; // Return the corresponding enum value
+        }
+    }
+    return GroceryCategory.DEFAULT; // Return DEFAULT if no match is found
 }
 
 
