@@ -18,6 +18,7 @@ import Inventory from "./components/Inventory";
 import FoodWasteChart from "./components/FoodWasteChart";
 import Navbar from "./components/Navbar"; 
 import ReviewBill from "./components/ReviewBill";
+import SynonymManagement from "./components/SynonymManagement";
 
 export const AuthContext = createContext();
 
@@ -107,6 +108,7 @@ function AppContent() {
         <Route path="/admin-dashboard/recipes" element={isAuthenticated && isAdmin ? <RecipeManager /> : <Navigate to="/user-dashboard" />} />
         <Route path="/admin-dashboard/manage-users" element={isAuthenticated && isAdmin ? <UserManagement /> : <Navigate to="/user-dashboard" replace />} />
         <Route path="/admin-dashboard/inventory" element={isAuthenticated && isAdmin ? <RecipeInventory /> : <Navigate to="/user-dashboard" />} />
+        <Route path="/admin-dashboard/synonym" element={isAuthenticated && isAdmin ? <SynonymManagement /> : <Navigate to="/user-dashboard" />} />
 
         {/* Redirect all unknown routes to home */}
         <Route path="*" element={<Navigate to="/" />} />

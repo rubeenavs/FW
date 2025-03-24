@@ -6,6 +6,7 @@ import UserManagement from "./UserManagement";
 import logoImage from "./Logo.jpg";
 import RecipeInventory from "./RecipeInventory";
 import LogoutButton from "./LogoutButton";
+import SynonymManagement from "./SynonymManagement";
 
 const AdminDashboard = () => {
     const [activeTab, setActiveTab] = useState("recipes");
@@ -22,6 +23,9 @@ const AdminDashboard = () => {
             case "inventory":
                 console.log("Rendering Inventory Component...")
                 return <RecipeInventory />;
+            case "synonym":
+                console.log("Rendering Synonym Component...")
+                return <SynonymManagement />;    
             default:
                 return <RecipeManager />;
         }
@@ -121,6 +125,14 @@ const AdminDashboard = () => {
                     onClick={() => setActiveTab("inventory")}
                 >
                     Recipe Library
+                </button>
+                <button
+                    style={styles.button(activeTab === "synonym")}
+                    onMouseOver={(e) => (e.target.style.transform = styles.buttonHover.transform)}
+                    onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
+                    onClick={() => setActiveTab("synonym")}
+                >
+                    Grocery Items
                 </button>
             </nav>
 

@@ -40,6 +40,7 @@ try {
     app.use("/api/food-waste", require("./routes/foodWasteRoutes"));
     app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
     app.use("/api/ocr", require("./routes/groceryOCRRoutes"));
+    app.use("/api/grocery-items", require("./routes/groceryItemsRoutes"));
 
 } catch (error) {
     console.error("❌ Error loading routes:", error);

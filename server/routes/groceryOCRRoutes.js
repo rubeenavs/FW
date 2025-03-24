@@ -8,13 +8,37 @@ const router = express.Router();
 const { GroceryCategory } = require("../enum/enums");
 
 let synonymMap = {};
-try {
-    synonymMap = JSON.parse(fs.readFileSync("./json/synonyms.json", "utf8"));
-    console.log("Loaded Synonym Map:", synonymMap);
-} catch (error) {
-    console.error("❌ Failed to load synonyms.json:", error);
+async function loadSynonymsFromSupabase() {
+    try {
+        const { data, error } = await supabase.from("grocery_items").select("*");
+
+        if (error) throw error;
+        console.log("✅ Synonyms fetched from Supabase:", data); // Debug log
+
+        if (!data || data.length === 0) {
+            console.warn("⚠️ No synonyms found in Supabase.");
+            return;
+        }
+
+        synonymMap = data.reduce((map, row) => {
+            if (Array.isArray(row.synonyms) && row.common_name) {
+                row.synonyms.forEach((syn) => {
+                    if (typeof syn === "string") {
+                        map[syn.toLowerCase()] = row.common_name;
+                    }
+                });
+            }
+            return map;
+        }, {});
+
+        console.log("✅ Loaded Synonym Map from Supabase:", synonymMap);
+    } catch (error) {
+        console.error("❌ Failed to load synonyms from Supabase:", error);
+    }
 }
 
+// Load synonyms at startup
+loadSynonymsFromSupabase();
 // Multer storage for uploaded images
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
