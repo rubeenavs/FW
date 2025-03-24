@@ -31,7 +31,6 @@ app.get("/api/health", (req, res) => {
 try {
     app.use("/api/groceries", require("./routes/groceryRoutes"));
     app.use("/api/register", require("./routes/registerRoute"));
-    console.log("🔍 Register Route Loaded!");
     app.use("/api/login", require("./routes/loginRoute"));  
     app.use("/api/admin", require("./routes/adminRoutes"));
     app.use("/api/recipes", require("./routes/recipeRoutes"));

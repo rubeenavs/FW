@@ -6,7 +6,7 @@ const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("user"); // Default role is "user"
+  const [role, setRole] = useState("admin"); // Default role is "user"
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {

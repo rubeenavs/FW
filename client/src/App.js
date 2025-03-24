@@ -17,6 +17,7 @@ import ChangePassword from "./components/ChangePassword";
 import Inventory from "./components/Inventory";
 import FoodWasteChart from "./components/FoodWasteChart";
 import Navbar from "./components/Navbar"; 
+import ReviewBill from "./components/ReviewBill";
 
 export const AuthContext = createContext();
 
@@ -98,6 +99,8 @@ function AppContent() {
         <Route path="/change-password/:userId" element={<ChangePassword />} />
         <Route path="/recipe-manager" element={<RecipeManager />} />
         <Route path="/recipe-library" element={<RecipeInventory />} />
+        <Route path="/review-bill" element={isAuthenticated ? <ReviewBill /> : <Navigate to="/login" />} />
+       
 
         {/* Admin Protected Routes */}
         <Route path="/admin-dashboard/*" element={isAuthenticated === null ? <Home /> : isAuthenticated && isAdmin ? <AdminDashboard /> : <Navigate to="/admin-dashboard" />} />

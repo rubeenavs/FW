@@ -73,6 +73,9 @@ router.put("/:userid/:groceryid", async (req, res) => {
   const { userid, groceryid } = req.params;
   const { name, quantity, unit, price, date_of_expiry, date_of_purchase } = req.body;
 
+  console.log('  userId :'+ userid + ' groceryid :' + groceryid);
+  console.log('  name :'+ name + ' quantity :' + quantity);
+
   if (!userid || !groceryid) {
       return res.status(400).json({ error: "User ID and Grocery ID are required" });
   }
@@ -92,6 +95,47 @@ router.put("/:userid/:groceryid", async (req, res) => {
       res.status(500).json({ error: "Server error" });
   }
 });
+
+// ✅ POST: Add Groceries
+router.post("/:userid/bulk", validateUserId, async (req, res) => {
+ try {
+
+    const { userid } = req.params;
+    const { items } = req.body;
+    console.log("Received items:", req.body);
+    console.log("user id :",userid);
+
+    for (const item of items) {
+        const { error } = grocerySchema.validate(item);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
+        }
+    }
+    
+            const { error } = await supabase.from("groceries").insert(
+                items.map(item => ({
+                    userid: userid,
+                    name: item.name,
+                    quantity: item.quantity,
+                    unit: item.unit,
+                    price: item.price,
+                    date_of_purchase: item.date_of_purchase,
+                    date_of_expiry: item.date_of_expiry
+                }))
+            );
+        
+            if (error) {
+                console.error("❌ Error inserting groceries:", error.message);
+                return res.status(500).json({ error: "Failed to add groceries to inventory" });
+            }
+        
+          return res.status(201).json({ message: "✅ Grocery items added successfully"});
+        
+        } catch (error) {
+            console.error("❌ Database Insertion Error:", error);
+            res.status(500).json({ error: "Server error" });
+        }
+    });
 
 
 module.exports = router;

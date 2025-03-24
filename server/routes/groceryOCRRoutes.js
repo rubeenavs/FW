@@ -7,6 +7,14 @@ const Joi = require("joi");
 const router = express.Router();
 const { GroceryCategory } = require("../enum/enums");
 
+let synonymMap = {};
+try {
+    synonymMap = JSON.parse(fs.readFileSync("./json/synonyms.json", "utf8"));
+    console.log("Loaded Synonym Map:", synonymMap);
+} catch (error) {
+    console.error("❌ Failed to load synonyms.json:", error);
+}
+
 // Multer storage for uploaded images
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -17,12 +25,12 @@ const storage = multer.diskStorage({
     },
 });
 
+
 const upload = multer({ storage: storage });
 
 // Upload scanned grocery bill & process it
 router.post("/:userId", upload.single("billImage"), async (req, res) => {
     const { userid } = req.params.userId;
-    console.log(' useriddddd :: ' + req.params.userId);
     console.log(' 1111useriddddd :: ' + userid);
     if (!req.file) {
         return res.status(400).json({ error: "No file uploaded" });
@@ -75,33 +83,9 @@ const grocerySchema = Joi.object({
         
             validatedItems.push(value);
         }
-        try {
-            const { error } = await supabase.from("groceries").insert(
-                validatedItems.map(item => ({
-                    userid: req.params.userId,
-                 //  userid: '42',
-                    name: item.name,
-                    quantity: item.quantity,
-                    unit: item.unit,
-                    price: item.price,
-                    date_of_purchase: item.date_of_purchase,
-                    date_of_expiry: item.date_of_expiry,
-                }))
-            );
-        
-            if (error) {
-                console.error("❌ Error inserting groceries:", error.message);
-                return res.status(500).json({ error: "Failed to add groceries to inventory" });
-            }
-        
-        //    res.json({ success: true, message: "✅ Grocery items added successfully", items: validatedItems });
-        
-        } catch (error) {
-            console.error("❌ Database Insertion Error:", error);
-            res.status(500).json({ error: "Server error" });
-        }
+       
 
-         res.json({ success: true, message: "Grocery items added to inventory", items: groceryItems });
+         res.json({ success: true, message: "Grocery items added to inventory", items: validatedItems });
 
     } catch (error) {
         console.error("❌ OCR Processing Error:", error);
@@ -168,17 +152,20 @@ function processItem(itemText, groceries) {
          }
         
          for(let i = 2 ; i < matchLength - totalL ; i ++  ){
-            name = name.concat( matchSplit[i] ).concat(" ");
+            name = name.concat(" ").concat( matchSplit[i] );
          }
-         name = name.concat(temp);
+         name = name.concat(" ").concat(temp);
+         name = getCommonName(preprocessName(name));
+         if(name) {  
          const quantity = parseFloat(matchSplit[matchLength - 2]);
          const price = parseFloat(matchSplit[matchLength - 1]);
          const currentDate = new Date();
          currentDate.setDate(currentDate.getDate() + findEnumInText(itemText));
          const expiryDate = currentDate.toISOString().split("T")[0];
-         console.log(' name : ' + name );
+         
     
          groceries.push({name, quantity, price, expiryDate});
+        }
     } else {
         console.log("No match:", itemText); // Debugging
     }
@@ -191,6 +178,35 @@ function findEnumInText(text) {
         }
     }
     return GroceryCategory.DEFAULT; // Return DEFAULT if no match is found
+}
+
+
+
+function getCommonName(extractedName) {
+    const nameLower = extractedName.toLowerCase();
+    
+    if (synonymMap[nameLower]) {
+        return synonymMap[nameLower];
+    }
+  for (const key in synonymMap) {
+    console.log(' key: ' + key);
+        if (nameLower.includes(key)) {
+            return synonymMap[key];
+        }
+    }
+
+    const words = nameLower.split(" ");
+    for (const word of words) {
+        if (synonymMap[word]) {
+            return synonymMap[word];
+        }
+    }
+
+    return null; // Fallback
+}
+
+function preprocessName(name) {
+    return name.toLowerCase().replace(/[^\w\s]/g, "").trim();
 }
 
 
