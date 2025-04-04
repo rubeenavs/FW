@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import logoImage from "./Logo.jpg";  // ✅ Import Logo
 import { showError, showSuccess } from "./alerts";
 
+
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -58,21 +59,26 @@ const Login = ({ onLogin }) => {
       }
 
       showSuccess("Login successful! Redirecting to dashboard...");
-
-      // ✅ Navigate FIRST before calling onLogin
-    if (data.user.role.toLowerCase() === "admin") {
-      console.log("✅ Navigating to Admin Dashboard");
-      navigate("/admin-dashboard");
-    } else {
-      console.log("✅ Navigating to User Dashboard");
-      navigate("/user-dashboard");
-    }
+      setTimeout(() => {
       if (rememberMe) {
         localStorage.setItem("user", JSON.stringify(data.user));
       }
 
       // ✅ Update authentication state
       onLogin(data.user.role, data.user, rememberMe);
+      setTimeout(() => {
+      // ✅ Navigate FIRST before calling onLogin
+    if (data.user.role.toLowerCase() === "admin") {
+      console.log("✅ Navigating to Admin Dashboard");
+      navigate("/admin-dashboard");
+    } else {
+      console.log(" user id: " + data.user.user_id);
+      console.log("✅ Navigating to User Dashboard");
+      navigate("/user-dashboard");
+    }
+     
+    },100);
+  }, 500);
     } catch (error) {
       console.error("❌ Login error:", error);
       showError("An error occurred while logging in. Please try again later.");

@@ -5,29 +5,6 @@ require("dotenv").config();
 const { supabase } = require("./db");
 const app = express();
 
-app.delete("/api/groceries/:userId/:groceryId", async (req, res) => {
-    const { userId, groceryId } = req.params;
-    console.log(`🔄 Received DELETE request for user: ${userId}, grocery: ${groceryId}`);
-
-    try {
-        const { error } = await supabase
-            .from("groceries")
-            .delete()
-            .eq("user_id", userId)
-            .eq("id", groceryId);
-
-        if (error) {
-            console.error("❌ Error deleting grocery:", error.message);
-            return res.status(500).json({ success: false, error: error.message });
-        }
-
-        console.log(`🗑️ Grocery with ID ${groceryId} deleted successfully.`);
-        res.json({ success: true, message: "Grocery deleted successfully." });
-    } catch (error) {
-        console.error("❌ Error deleting grocery:", error.message);
-        res.status(500).json({ success: false, error: error.message });
-    }
-});
 
 // ✅ Middleware - CORS Configuration
 app.use(cors({
@@ -62,10 +39,9 @@ try {
     app.use("/api/recommendations", require("./routes/recommendationRoutes"));
     app.use("/api/food-waste", require("./routes/foodWasteRoutes"));
     app.use("/api/upcoming-expiries", require("./routes/foodWasteRoutes"));
-    
+    app.use("/api/ocr", require("./routes/groceryOCRRoutes"));
+    app.use("/api/grocery-items", require("./routes/groceryItemsRoutes"));
 
-
-    console.log("✅ API routes loaded successfully!");
 } catch (error) {
     console.error("❌ Error loading routes:", error);
 }
