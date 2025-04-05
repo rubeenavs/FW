@@ -42,6 +42,7 @@ router.post("/", async (req, res) => {
 
         console.log("🔍 User Password from DB:", user.password);
         console.log("🔍 Password entered:", password);
+        console.log("🔍 user id :", user.userid);
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         console.log("🔍 Password Match:", isPasswordValid);

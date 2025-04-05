@@ -3,16 +3,19 @@ import axios from "axios";
 import Navbar from "./Navbar";
 import { AuthContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import Modal from "./Modal"; // Import modal
+import { showError, showSuccess } from "./alerts";
 
 const Inventory = () => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [groceries, setGroceries] = useState([]);
     const [expiredGroceries, setExpiredGroceries] = useState([]);
     const [wasteSummary, setWasteSummary] = useState({ low: 0, medium: 0, high: 0, expired: 0 });
     const [totalWasteCost, setTotalWasteCost] = useState(0);
     const [wasteReductionTips, setWasteReductionTips] = useState([]);
+    const [selectedGrocery, setSelectedGrocery] = useState(null);
 
     const capitalizeFirstLetter = (str) => {
         if (!str) return "";
@@ -26,6 +29,14 @@ const Inventory = () => {
             fetchGroceries(user.id);
         }
     }, [user, navigate]);
+    useEffect(() => {
+        if (selectedGrocery) {
+            setIsModalOpen(true); // Open modal only after state updates
+            console.log(' Selected list :' + selectedGrocery);
+          }
+        console.log(' use effect seected items');
+    }, [selectedGrocery]);
+   
 
     // ✅ FIXED: Correct String Interpolation for Fetching Groceries
     const fetchGroceries = useCallback(async (userId) => {
@@ -112,8 +123,45 @@ const Inventory = () => {
     };
 
     // ✅ FIXED: Correct Template Literal Syntax for Navigation
-    const handleEditGrocery = (groceryId) => {
-        navigate(`/edit-grocery/${groceryId}`); // ✅ FIXED
+    const handleEditGrocery = (grocery) => {
+       // navigate(`/edit-grocery/${groceryId}`); // ✅ FIXED
+       setSelectedGrocery(grocery);
+       
+    //    setIsModalOpen(true);
+    //    console.log(' Modal is  :' + isModalOpen);
+    };
+    // Close modal
+     const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedGrocery(null);
+     };
+
+     const handleSaveChanges = async (formDataGrocery) => {
+        console.log(' selected one : ' + formDataGrocery);
+        
+        if (!formDataGrocery.name || !formDataGrocery.quantity || !formDataGrocery.unit || !formDataGrocery.price || !selectedGrocery.date_of_purchase) {
+                    showError("⚠ Please fill out all required fields.");
+                    return;
+                }
+        if (!formDataGrocery) return;
+        
+        try {
+            const formattedGrocery = {
+                name: formDataGrocery.name.trim().toLowerCase(),
+                quantity: parseFloat(formDataGrocery.quantity),
+                unit: formDataGrocery.unit,
+                price: parseFloat(formDataGrocery.price),
+                date_of_expiry: formDataGrocery.date_of_expiry ? new Date(formDataGrocery.date_of_expiry).toISOString().split("T")[0] : null,
+                date_of_purchase: new Date(formDataGrocery.date_of_purchase).toISOString().split("T")[0],
+            };
+            await axios.put(`http://localhost:5000/api/groceries/${user.id}/${formDataGrocery.groceryid}`, formattedGrocery);
+            setGroceries((prev) => prev.map((item) => (item.groceryid === formDataGrocery.groceryid ? formattedGrocery : item)));
+            closeModal();
+            fetchGroceries(user.id);
+          //  showSuccess("✅ Grocery updated successfully!");
+        } catch (error) {
+            console.error("Error updating grocery:", error.message);
+        }
     };
 
     const sortedGroceries = [...groceries].sort((a, b) => new Date(a.date_of_purchase) - new Date(b.date_of_purchase));
@@ -165,7 +213,7 @@ const Inventory = () => {
                                             {isExpired ? 'Expired' : daysToExpiry >= 8 ? 'Low Risk' : daysToExpiry >= 4 ? 'Medium Risk' : 'High Risk'}
                                         </td>
                                         <td>
-                                            <button onClick={() => handleEditGrocery(grocery.groceryid)} style={{ padding: '8px 16px', margin: '5px', border: 'none', backgroundColor: '#4CAF50', color: 'white' }}>Edit</button>
+                                            <button onClick={() => handleEditGrocery(grocery)} style={{ padding: '8px 16px', margin: '5px', border: 'none', backgroundColor: '#4CAF50', color: 'white' }}>Edit</button>
                                             <button onClick={() => handleDeleteGrocery(grocery.groceryid)} style={{ padding: '8px 16px', margin: '5px', border: 'none', backgroundColor: '#ff4d4d', color: 'white' }}>Delete</button>
                                         </td>
                                     </tr>
@@ -211,6 +259,11 @@ const Inventory = () => {
                     </div>
                 </div>
             </div>
+            {isModalOpen && selectedGrocery && (
+       <div>     
+       <Modal isOpen={isModalOpen} onClose={closeModal} selectedGrocery={selectedGrocery} onSave={handleSaveChanges} />
+     </div>
+      )}
             </div>
 
         );

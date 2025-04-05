@@ -8,7 +8,9 @@ function CookingManager({ userId }) {
     const [selectedRecipe, setSelectedRecipe] = useState(null);
     const [pax, setPax] = useState("");
     const [portionWasted, setPortionWasted] = useState("");
-    const navigate = useNavigate(); // ✅ Navigation Hook
+    // New state to hold the last cooking calculation id.
+    const [calculationId, setCalculationId] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (userId) {
@@ -50,6 +52,8 @@ function CookingManager({ userId }) {
             });
 
             alert(response.data.message);
+            // Save the returned calculation id so that waste can be recorded later.
+            setCalculationId(response.data.calculationid);
             fetchRecommendations();
         } catch (error) {
             console.error("❌ Error cooking recipe:", error.response?.data || error.message);
@@ -57,14 +61,15 @@ function CookingManager({ userId }) {
     };
 
     const handleWasteSubmit = async () => {
-        if (!selectedRecipe || !portionWasted) {
-            alert("Please select a recipe and enter portion wasted.");
+        // Use the stored calculationId for waste submission
+        if (!calculationId || !portionWasted) {
+            alert("Please cook a recipe first and then enter portion wasted.");
             return;
         }
 
         try {
-            console.log("Submitting waste data for recipe:", selectedRecipe.recipeid);
-            await axios.put(`http://localhost:5000/api/cook/waste/${selectedRecipe.calculationid}`, { portionwasted: parseFloat(portionWasted) });
+            console.log("Submitting waste data for calculation id:", calculationId);
+            await axios.put(`http://localhost:5000/api/cook/waste/${calculationId}`, { portionwasted: parseFloat(portionWasted) });
             alert("Waste recorded successfully!");
         } catch (error) {
             console.error("Error recording waste:", error.response?.data || error.message);
@@ -143,11 +148,8 @@ function CookingManager({ userId }) {
 
     return (
         <div style={styles.container}>
-            <Navbar /> {/* ✅ Navbar for navigation */}
-
+            <Navbar />
             <h1 style={styles.title}>Cooking Manager</h1>
-
-            {/* ✅ Navigation Buttons */}
             <div style={styles.navigationButtons}>
                 <button style={styles.navButton} onClick={() => navigate("/groceries")}>Grocery Manager</button>
                 <button style={styles.navButton} onClick={() => navigate("/inventory")}>Inventory</button>

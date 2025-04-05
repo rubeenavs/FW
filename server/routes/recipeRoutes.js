@@ -2,6 +2,24 @@ const express = require('express');
 const { supabase } = require('../db');
 const router = express.Router();
 
+// ✅ Normalize ingredient structure
+const normalizeIngredients = (ingredients) => {
+    return ingredients.map((ingredient) => {
+        // Try to infer 'item' if it doesn't exist
+        const knownKeys = Object.keys(ingredient);
+        const guessItem = knownKeys.find(
+            key => !['quantity', 'ingredient_quantity', 'unit', 'ingredient_unit'].includes(key)
+        );
+
+        return {
+            item: ingredient.ingredient_name || ingredient.item || ingredient[guessItem] || "Unknown",
+            quantity: ingredient.ingredient_quantity || ingredient.quantity || "Unknown",
+            unit: ingredient.ingredient_unit || ingredient.unit || "Unknown"
+        };
+    });
+};
+
+
 // ✅ Add a recipe
 router.post('/', async (req, res) => {
     const { recipe_name, description, cooking_time, steps, sustainability_notes, ingredients } = req.body;
@@ -11,18 +29,18 @@ router.post('/', async (req, res) => {
     }
 
     try {
+        const normalizedIngredients = normalizeIngredients(ingredients); // ✅ Normalize here
+
         const { data, error } = await supabase
             .from("recipes")
-            .insert([
-                {
-                    name: recipe_name.trim(),
-                    description: description?.trim() || null,
-                    cooking_time: cooking_time?.trim() || null,
-                    steps: steps.trim(),
-                    sustainability_notes: sustainability_notes?.trim() || null,
-                    ingredients: JSON.stringify(ingredients)
-                }
-            ])
+            .insert([{
+                name: recipe_name.trim(),
+                description: description?.trim() || null,
+                cooking_time: cooking_time?.trim() || null,
+                steps: steps.trim(),
+                sustainability_notes: sustainability_notes?.trim() || null,
+                ingredients: JSON.stringify(normalizedIngredients)
+            }])
             .select("*");
 
         if (error) return res.status(500).json({ error: "Database error", details: error.message });
@@ -33,36 +51,26 @@ router.post('/', async (req, res) => {
     }
 });
 
+
 // ✅ Fetch all recipes
 router.get("/", async (req, res) => {
     try {
-        console.log("🛠 Fetching all recipes from Supabase...");
-
         const { data, error } = await supabase
             .from("recipes")
             .select("recipeid, name, description, cooking_time, ingredients, steps, sustainability_notes");
 
         if (error) {
-            console.error("❌ Supabase Fetch Error:", error);
             return res.status(500).json({ error: "Database error", details: error.message });
         }
 
-        if (!data || data.length === 0) {
-            console.warn("⚠️ No recipes found in the database.");
-        }
-
-        console.log("✅ Fetched Recipes Data:", data);
-
-        // Parse `ingredients` field if needed
         const cleanedData = data.map((recipe) => {
-            let parsedIngredients;
+            let parsedIngredients = [];
 
             try {
                 parsedIngredients = typeof recipe.ingredients === "string"
                     ? JSON.parse(recipe.ingredients)
                     : recipe.ingredients;
             } catch (error) {
-                console.error(`❌ Error parsing ingredients for recipe ${recipe.recipeid}:`, error);
                 parsedIngredients = [];
             }
 
@@ -73,19 +81,15 @@ router.get("/", async (req, res) => {
                 cooking_time: recipe.cooking_time || "Not specified",
                 steps: recipe.steps || "No steps provided",
                 sustainability_notes: recipe.sustainability_notes || "No sustainability notes",
-                ingredients: parsedIngredients
+                ingredients: normalizeIngredients(parsedIngredients)
             };
         });
 
-        console.log("✅ Cleaned Recipes Data:", cleanedData);
-
         res.status(200).json(cleanedData);
     } catch (error) {
-        console.error("❌ Internal Server Error:", error);
         res.status(500).json({ error: "Internal Server Error", details: error.message });
     }
 });
-
 
 // ✅ Delete a recipe
 router.delete("/:recipeid", async (req, res) => {
@@ -93,7 +97,6 @@ router.delete("/:recipeid", async (req, res) => {
 
     try {
         const { error } = await supabase.from("recipes").delete().eq("recipeid", recipeid);
-
         if (error) return res.status(500).json({ error: "Database error", details: error.message });
 
         res.status(200).json({ message: "Recipe deleted successfully" });
@@ -107,14 +110,12 @@ router.put("/:recipeid", async (req, res) => {
     const { recipeid } = req.params;
     const { name, description, cooking_time, steps, sustainability_notes, ingredients } = req.body;
 
-    // ✅ Validate Required Fields
     if (!name || !ingredients || !Array.isArray(ingredients) || ingredients.length === 0) {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
     try {
-        console.log(`🛠 Updating recipe ${recipeid}...`);
-        console.log("🔹 Updated Data:", req.body);
+        const normalizedIngredients = normalizeIngredients(ingredients);
 
         const { data, error } = await supabase
             .from("recipes")
@@ -124,20 +125,15 @@ router.put("/:recipeid", async (req, res) => {
                 cooking_time,
                 steps,
                 sustainability_notes,
-                ingredients: JSON.stringify(ingredients)
+                ingredients: JSON.stringify(normalizedIngredients)
             })
             .eq("recipeid", recipeid)
             .select("*");
 
-        if (error) {
-            console.error("❌ Supabase Update Error:", error);
-            return res.status(500).json({ error: "Database update failed", details: error.message });
-        }
+        if (error) return res.status(500).json({ error: "Database update failed", details: error.message });
 
-        console.log("✅ Recipe updated successfully:", data);
         res.status(200).json({ message: "Recipe updated", recipe: data });
     } catch (err) {
-        console.error("❌ Server Error:", err);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

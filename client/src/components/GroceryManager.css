@@ -1,0 +1,97 @@
+/* GroceryManager.css */
+.page-container {
+    background-image: url("../../public/images/9.jpg");
+    background-size: cover;
+    background-position: center;
+    font-family: "Shadows Into Light", cursive;
+    min-height: 300vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+}
+
+.track-box {
+    background: #2e856e;
+    padding: 20px 20px;
+    font-size: 50px;
+    font-weight: bold;
+    color: white;
+    position: absolute;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    top: 28%;
+}
+
+.title {
+    font-family: "Shadows Into Light", cursive;
+    font-size: 50px;
+    font-weight: bold;
+    color: #358856;
+    text-align: center;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    position: absolute;
+    top: 5%;
+    left: 30%;
+    transform: translateX(-50%);
+}
+
+.container {
+    background: #1e3a34;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.3);
+    max-width: 450px;
+    text-align: center;
+    margin-top: 20%;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.label {
+    font-family: "Shadows Into Light", cursive;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #f5f5dc;
+}
+
+.input, .select {
+    font-family: "Shadows Into Light", cursive;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    width: 100%;
+    background: #e0e0d1;
+    color: #1e3a34;
+}
+
+.button {
+    font-family: "Shadows Into Light", cursive;
+    padding: 12px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    background-color: #2e856e;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%;
+}
+
+.button:hover {
+    background-color: #1e3a34;
+    transform: scale(1.05);
+}

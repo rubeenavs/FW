@@ -87,11 +87,15 @@ function RecipeInventory() {
                             <p style={styles.recipeDetails}><strong>Ingredients:</strong></p>
                             <ul style={styles.ingredientList}>
                                 {recipe.ingredients && Array.isArray(recipe.ingredients) ? (
-                                    recipe.ingredients.map((ingredient, idx) => (
-                                        <li key={idx}>
-                                            {ingredient.ingredient_name} - {ingredient.quantity} {ingredient.unit}
-                                        </li>
-                                    ))
+                                    recipe.ingredients.map((ingredient, idx) => {
+                                        const item = ingredient.item !== "Unknown" ? ingredient.item : "";
+                                        const quantity = ingredient.quantity !== "Unknown" ? ingredient.quantity : "";
+                                        const unit = ingredient.unit !== "Unknown" ? ingredient.unit : "";
+
+                                        const display = [item, quantity ? `- ${quantity}` : "", unit].filter(Boolean).join(" ");
+
+                                        return <li key={idx}>{display}</li>;
+                                    })
                                 ) : (
                                     <p>No ingredients available</p>
                                 )}
