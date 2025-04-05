@@ -1,17 +1,27 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import "./GroceryManager.css"; // Keep styles centralized
+import UploadBill from "./UploadBill"; // ✅ Import the UploadBill component
 
-const GroceryForm = ({ grocery,  onSubmit, isEdit , onClose }) => {
+const GroceryForm = ({ grocery, onSubmit, isEdit, onClose, userId }) => {
+  const [formData, setFormData] = useState(grocery);
 
-    const [formData, setFormData] = useState(grocery);
   return (
     <div className="form-container">
+
+      {/* ✅ UploadBill inside the form */}
+      <div className="form-group">
+        <UploadBill userId={userId} />
+      </div>
+
+      {/* 📝 Manual Entry Form */}
       <div className="form-group">
         <label>Grocery Name</label>
         <input
           type="text"
           value={formData.name}
-          onChange={(e) => {console.log('clicking '); setFormData({ ...formData, name: e.target.value })}}
+          onChange={(e) =>
+            setFormData({ ...formData, name: e.target.value })
+          }
         />
       </div>
 
@@ -20,7 +30,9 @@ const GroceryForm = ({ grocery,  onSubmit, isEdit , onClose }) => {
         <input
           type="number"
           value={formData.quantity}
-          onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, quantity: e.target.value })
+          }
         />
       </div>
 
@@ -28,7 +40,9 @@ const GroceryForm = ({ grocery,  onSubmit, isEdit , onClose }) => {
         <label>Unit</label>
         <select
           value={formData.unit}
-          onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, unit: e.target.value })
+          }
         >
           <option value="kg">kg</option>
           <option value="g">g</option>
@@ -42,7 +56,9 @@ const GroceryForm = ({ grocery,  onSubmit, isEdit , onClose }) => {
         <input
           type="number"
           value={formData.price}
-          onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, price: e.target.value })
+          }
         />
       </div>
 
@@ -51,7 +67,9 @@ const GroceryForm = ({ grocery,  onSubmit, isEdit , onClose }) => {
         <input
           type="date"
           value={formData.date_of_purchase}
-          onChange={(e) => setFormData({ ...formData, date_of_purchase: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, date_of_purchase: e.target.value })
+          }
         />
       </div>
 
@@ -60,13 +78,16 @@ const GroceryForm = ({ grocery,  onSubmit, isEdit , onClose }) => {
         <input
           type="date"
           value={formData.date_of_expiry}
-          onChange={(e) => setFormData({ ...formData, date_of_expiry: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, date_of_expiry: e.target.value })
+          }
         />
       </div>
 
-      <button onClick={() => onSubmit(formData)}>{isEdit ? "Save Changes" : "Add Grocery"}</button>
+      <button onClick={() => onSubmit(formData)}>
+        {isEdit ? "Save Changes" : "Add Grocery"}
+      </button>
       <button onClick={onClose}>Close</button>
-      
     </div>
   );
 };

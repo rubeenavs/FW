@@ -12,10 +12,10 @@ router.post("/", async (req, res) => {
     try {
         console.log(`🔹 Processing cooking request for user ${userid}, recipe ${recipeid}...`);
 
-        // ✅ Fetch all groceries for debugging (Fixed column name)
+        // ✅ Fetch all groceries for debugging
         const { data: allGroceries, error: allGroceriesError } = await supabase
             .from("groceries")
-            .select("groceryid, name, quantity, unit, date_of_purchase") // ✅ Fixed column name
+            .select("groceryid, name, quantity, unit, date_of_purchase")
             .eq("userid", userid);
 
         if (allGroceriesError) {
@@ -25,30 +25,38 @@ router.post("/", async (req, res) => {
         }
 
         for (let ingredient of ingredientsUsed) {
-            let { ingredient_name, quantity, unit } = ingredient;
-            const formattedIngredientName = ingredient_name.trim().toLowerCase();
+            // Check both possible property names for quantity and unit
+            const ingredientName = ingredient.ingredient_name || ingredient.name;
+            let ingredientQuantity = ingredient.ingredient_quantity || ingredient.quantity;
+            let ingredientUnit = ingredient.ingredient_unit || ingredient.unit;
 
-            let usedAmount = parseFloat(quantity) * parseFloat(pax);
-
-            // Convert kg → g, l → ml
-            if (unit === "kg") {
-                usedAmount *= 1000;
-                unit = "g";
-            } else if (unit === "l") {
-                usedAmount *= 1000;
-                unit = "ml";
+            if (!ingredientName || !ingredientQuantity || !ingredientUnit) {
+                console.warn(`⚠️ Ingredient data missing for one ingredient:`, ingredient);
+                continue;
             }
 
-            console.log(`🔹 Deducting ${usedAmount} ${unit} of ${ingredient_name} using FIFO`);
-            console.log(`🔍 Checking stock for: "${ingredient_name}" (Formatted: "${formattedIngredientName}")`);
+            const formattedIngredientName = ingredientName.trim().toLowerCase();
+            let usedAmount = parseFloat(ingredientQuantity) * parseFloat(pax);
 
-            // ✅ Fetch grocery stock (Fixed column name `date_of_purchase`)
+            // Convert kg → g, l → ml
+            if (ingredientUnit === "kg") {
+                usedAmount *= 1000;
+                ingredientUnit = "g";
+            } else if (ingredientUnit === "l") {
+                usedAmount *= 1000;
+                ingredientUnit = "ml";
+            }
+
+            console.log(`🔹 Deducting ${usedAmount} ${ingredientUnit} of ${ingredientName} using FIFO`);
+            console.log(`🔍 Checking stock for: "${ingredientName}" (Formatted: "${formattedIngredientName}")`);
+
+            // ✅ Fetch grocery stock (Fixed column name: date_of_purchase)
             const { data: groceries, error: fetchError } = await supabase
                 .from("groceries")
-                .select("groceryid, name, quantity, unit, date_of_purchase") // ✅ Fixed column name
+                .select("groceryid, name, quantity, unit, date_of_purchase")
                 .eq("userid", userid)
                 .ilike("name", formattedIngredientName)
-                .order("date_of_purchase", { ascending: true }); // ✅ Fixed column name
+                .order("date_of_purchase", { ascending: true });
 
             console.log(`🔍 Retrieved groceries for ${formattedIngredientName}:`, groceries);
 
@@ -77,31 +85,31 @@ router.post("/", async (req, res) => {
                 let finalUnit = stockUnit;
 
                 if (updatedQuantity > 0) {
+                    // Convert back if possible
                     if (updatedQuantity >= 1000 && stockUnit === "g") {
                         updatedQuantity /= 1000;
                         finalUnit = "kg";
                     }
 
-                    console.log(`🛠 Updating ${ingredient_name}: ID=${groceryid}, Current=${stockAvailable}, New=${updatedQuantity.toFixed(2)}, Unit=${finalUnit}`);
+                    console.log(`🛠 Updating ${ingredientName}: ID=${groceryid}, Current=${stockAvailable}, New=${updatedQuantity.toFixed(2)}, Unit=${finalUnit}`);
 
                     const { data: updatedRow, error: updateError } = await supabase
                         .from("groceries")
                         .update({ quantity: updatedQuantity.toFixed(2), unit: finalUnit })
                         .eq("groceryid", groceryid)
-                        .neq("quantity", updatedQuantity.toFixed(2))
                         .select();
 
                     if (updateError) {
-                        console.error(`❌ Supabase Error updating ${ingredient_name}:`, updateError);
+                        console.error(`❌ Supabase Error updating ${ingredientName}:`, updateError);
                     } else if (!updatedRow || updatedRow.length === 0) {
-                        console.warn(`⚠️ WARNING: No rows updated for ${ingredient_name} (ID: ${groceryid})`);
+                        console.warn(`⚠️ WARNING: No rows updated for ${ingredientName} (ID: ${groceryid})`);
                     } else {
-                        console.log(`✅ SUCCESS: Updated ${ingredient_name} to ${updatedQuantity} ${finalUnit}`);
+                        console.log(`✅ SUCCESS: Updated ${ingredientName} to ${updatedQuantity} ${finalUnit}`);
                     }
 
                     remainingToDeduct = 0;
                 } else {
-                    console.log(`🗑 Removing ${ingredient_name} stock (depleted ${stockAvailable} ${stockUnit})`);
+                    console.log(`🗑 Removing ${ingredientName} stock (depleted ${stockAvailable} ${stockUnit})`);
 
                     const { error: deleteError } = await supabase
                         .from("groceries")
@@ -109,7 +117,7 @@ router.post("/", async (req, res) => {
                         .eq("groceryid", groceryid);
 
                     if (deleteError) {
-                        console.error(`❌ Error deleting ${ingredient_name}:`, deleteError);
+                        console.error(`❌ Error deleting ${ingredientName}:`, deleteError);
                     }
 
                     remainingToDeduct -= stockAvailable;
@@ -117,22 +125,20 @@ router.post("/", async (req, res) => {
             }
 
             if (remainingToDeduct > 0) {
-                console.warn(`⚠️ Not enough ${ingredient_name} in stock. Missing ${remainingToDeduct} ${unit}`);
+                console.warn(`⚠️ Not enough ${ingredientName} in stock. Missing ${remainingToDeduct} ${ingredientUnit}`);
             }
         }
 
         // ✅ Insert cooking event into `calculations` table
         const { data, error } = await supabase
             .from("calculations")
-            .insert([
-                {
-                    userid: userid,
-                    recipeid: recipeid,
-                    pax: pax,
-                    ingredients_used: JSON.stringify(ingredientsUsed),
-                    portionwasted: 0
-                }
-            ])
+            .insert([{
+                userid: userid,
+                recipeid: recipeid,
+                pax: pax,
+                ingredients_used: JSON.stringify(ingredientsUsed),
+                portionwasted: 0
+            }])
             .select();
 
         if (error) {
@@ -140,6 +146,7 @@ router.post("/", async (req, res) => {
             return res.status(500).json({ error: "Failed to save cooking data", details: error.message });
         }
 
+        // Return the calculationid along with the success message.
         res.status(200).json({
             message: "Cooking process completed!",
             calculationid: data[0].calculationid
@@ -151,3 +158,4 @@ router.post("/", async (req, res) => {
 });
 
 module.exports = router;
+
